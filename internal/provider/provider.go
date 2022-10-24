@@ -2,7 +2,11 @@ package provider
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-provider-scaffolding-framework/internal/apiclient"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -12,33 +16,33 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// Ensure ScaffoldingProvider satisfies various provider interfaces.
-var _ provider.Provider = &ScaffoldingProvider{}
-var _ provider.ProviderWithMetadata = &ScaffoldingProvider{}
+// Ensure AirbyteProvider satisfies various provider interfaces.
+var _ provider.Provider = &AirbyteProvider{}
+var _ provider.ProviderWithMetadata = &AirbyteProvider{}
 
-// ScaffoldingProvider defines the provider implementation.
-type ScaffoldingProvider struct {
+// AirbyteProvider defines the provider implementation.
+type AirbyteProvider struct {
 	// version is set to the provider version on release, "dev" when the
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
 	version string
 }
 
-// ScaffoldingProviderModel describes the provider data model.
-type ScaffoldingProviderModel struct {
-	Endpoint types.String `tfsdk:"endpoint"`
+// AirbyteProviderModel describes the provider data model.
+type AirbyteProviderModel struct {
+	HostUrl types.String `tfsdk:"host_url"`
 }
 
-func (p *ScaffoldingProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "scaffolding"
+func (p *AirbyteProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+	resp.TypeName = "airbyte"
 	resp.Version = p.version
 }
 
-func (p *ScaffoldingProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (p *AirbyteProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
-			"endpoint": {
-				MarkdownDescription: "Example provider attribute",
+			"host_url": {
+				MarkdownDescription: "Airbyte API URL",
 				Optional:            true,
 				Type:                types.StringType,
 			},
@@ -46,8 +50,8 @@ func (p *ScaffoldingProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag
 	}, nil
 }
 
-func (p *ScaffoldingProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	var data ScaffoldingProviderModel
+func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	var data AirbyteProviderModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 
@@ -55,30 +59,65 @@ func (p *ScaffoldingProvider) Configure(ctx context.Context, req provider.Config
 		return
 	}
 
-	// Configuration values are now available.
-	// if data.Endpoint.IsNull() { /* ... */ }
+	if data.HostUrl.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("host_url"),
+			"Unknown Airbyte API URL",
+			"The provider cannot create the Airbyte API client as there is an unknown configuration value for the Airbyte API URL. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the AIRBYTE_URL environment variable.",
+		)
+	}
 
-	// Example client configuration for data sources and resources
-	client := http.DefaultClient
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	hostUrl, ok := os.LookupEnv("AIRBYTE_URL")
+	if !ok {
+		hostUrl = "http://localhost:8000"
+	}
+
+	if !data.HostUrl.IsNull() {
+		hostUrl = data.HostUrl.Value
+	}
+
+	if hostUrl == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("host_url"),
+			"Missing Airbyte API URL",
+			"The provider cannot create the Airbyte API client as there is a missing or empty value for the Airbyte API URL. "+
+				"Set the host value in the configuration or use the AIRBYTE_URL environment variable. "+
+				"If either is already set, ensure the value is not empty.",
+		)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	client := apiclient.ApiClient{
+		HostURL:    hostUrl,
+		HTTPClient: &http.Client{Timeout: 120 * time.Second},
+	}
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
 
-func (p *ScaffoldingProvider) Resources(ctx context.Context) []func() resource.Resource {
+func (p *AirbyteProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewExampleResource,
+		NewWorkspaceResource,
 	}
 }
 
-func (p *ScaffoldingProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+func (p *AirbyteProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewExampleDataSource,
+		NewWorkspaceDataSource,
 	}
 }
 
 func New(version string) func() provider.Provider {
 	return func() provider.Provider {
-		return &ScaffoldingProvider{
+		return &AirbyteProvider{
 			version: version,
 		}
 	}
