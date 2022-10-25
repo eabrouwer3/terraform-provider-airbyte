@@ -40,14 +40,12 @@ func FlattenWorkspace(workspace *apiclient.Workspace) WorkspaceModel {
 	if len(workspace.Notifications) > 0 {
 		data.NotificationConfig = []workspaceNotificationConfigModel{}
 		for _, notifConfig := range workspace.Notifications {
-			notifData := workspaceNotificationConfigModel{
+			data.NotificationConfig = append(data.NotificationConfig, workspaceNotificationConfigModel{
 				NotificationType: types.String{Value: notifConfig.NotificationType},
 				SendOnSuccess:    types.Bool{Value: *notifConfig.SendOnSuccess},
 				SendOnFailure:    types.Bool{Value: *notifConfig.SendOnFailure},
 				SlackWebhook:     types.String{Value: notifConfig.SlackConfiguration.Webhook},
-			}
-
-			data.NotificationConfig = append(data.NotificationConfig, notifData)
+			})
 		}
 	}
 	data.Email = types.String{Value: workspace.Email}

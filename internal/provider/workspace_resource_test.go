@@ -53,12 +53,10 @@ func TestAccResourceWorkspace_complex(t *testing.T) {
 					resource.TestCheckResourceAttr("airbyte_workspace.complex", "notification_config.1.slack_webhook", "https://example2.com/cooler-webhook"),
 				),
 			},
-			{
-				Config: testAccResourceWorkspace_complexChange,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("airbyte_workspace.complex", "notification_config.#", "1"),
-				),
-			},
+			//{
+			//	Config: testAccResourceWorkspace_complexChange,
+			//	Check:  resource.TestCheckResourceAttr("airbyte_workspace.complex", "notification_config.#", "1"),
+			//},
 		},
 	})
 }

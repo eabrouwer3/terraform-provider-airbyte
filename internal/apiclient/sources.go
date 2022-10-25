@@ -12,8 +12,8 @@ type SourceIdBody struct {
 }
 
 type CommonSourceFields struct {
-	Name                    string         `json:"name"`
-	ConnectionConfiguration map[string]any `json:"connectionConfiguration"`
+	Name                    string          `json:"name"`
+	ConnectionConfiguration json.RawMessage `json:"connectionConfiguration"`
 }
 
 type Source struct {

@@ -106,6 +106,8 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 func (p *AirbyteProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewWorkspaceResource,
+		NewSourceDefinitionResource,
+		NewSourceResource,
 	}
 }
 

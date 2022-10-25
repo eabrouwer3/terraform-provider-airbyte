@@ -83,37 +83,6 @@ func (c *ApiClient) GetSourceDefinitionById(sourceDefinitionId string) (*SourceD
 	return &sd, nil
 }
 
-// TODO: Implement this
-
-func (c *ApiClient) GetSourceDefinitionSpec(sourceDefinitionId string) (*SourceDefinition, error) {
-	rb, err := json.Marshal(struct {
-		SourceDefinitionId string `json:"sourceDefinitionId"`
-	}{
-		SourceDefinitionId: sourceDefinitionId,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/source_definitions/get", c.HostURL, BaseUrl), strings.NewReader(string(rb)))
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := c.doRequest(req)
-	if err != nil {
-		return nil, err
-	}
-
-	sd := SourceDefinition{}
-	err = json.Unmarshal(body, &sd)
-	if err != nil {
-		return nil, err
-	}
-
-	return &sd, nil
-}
-
 func (c *ApiClient) CreateSourceDefinition(newSourceDefinition NewSourceDefinition) (*SourceDefinition, error) {
 	rb, err := json.Marshal(newSourceDefinition)
 	if err != nil {
