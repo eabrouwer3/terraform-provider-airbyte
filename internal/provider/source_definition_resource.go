@@ -181,7 +181,7 @@ func (r *SourceDefinitionResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	newSourceDefinition := getCommonConnectorDefinitionFields(plan)
+	newSourceDefinition := GetCommonConnectorDefinitionFields(plan)
 
 	sourceDefinition, err := r.client.CreateConnectorDefinition(newSourceDefinition, apiclient.SourceType)
 	if err != nil {
@@ -250,7 +250,7 @@ func (r *SourceDefinitionResource) Update(ctx context.Context, req resource.Upda
 	sourceDefinition, err := r.client.UpdateConnectorDefinition(updatedSourceDefinition, apiclient.SourceType)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error updating sourceDefinition",
+			"Error updating Source Definition",
 			"Could not update Source Definition, unexpected error: "+err.Error(),
 		)
 		return
@@ -274,7 +274,7 @@ func (r *SourceDefinitionResource) Delete(ctx context.Context, req resource.Dele
 	err := r.client.DeleteConnectorDefinition(sourceDefinitionId, apiclient.SourceType)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error updating sourceDefinition",
+			"Error updating Source Definition",
 			"Could not update Source Definition, unexpected error: "+err.Error(),
 		)
 	}

@@ -113,7 +113,7 @@ func FlattenConnectorDefinition(connectorDefinition *apiclient.ConnectorDefiniti
 	return &data, nil
 }
 
-func getCommonConnectorDefinitionFields(data ConnectorDefinitionModel) apiclient.CommonConnectorDefinitionFields {
+func GetCommonConnectorDefinitionFields(data ConnectorDefinitionModel) apiclient.CommonConnectorDefinitionFields {
 	return apiclient.CommonConnectorDefinitionFields{
 		Name:                 data.Name.Value,
 		DockerRepository:     data.DockerRepository.Value,

@@ -36,12 +36,12 @@ func (r *DestinationDefinitionResource) GetSchema(ctx context.Context) (tfsdk.Sc
 
 		Attributes: map[string]tfsdk.Attribute{
 			"id": {
-				Description: "Source Definition ID",
+				Description: "Destination Definition ID",
 				Type:        types.StringType,
 				Computed:    true,
 			},
 			"name": {
-				Description: "Source Definition Name",
+				Description: "Destination Definition Name",
 				Type:        types.StringType,
 				Required:    true,
 				PlanModifiers: tfsdk.AttributePlanModifiers{
@@ -49,7 +49,7 @@ func (r *DestinationDefinitionResource) GetSchema(ctx context.Context) (tfsdk.Sc
 				},
 			},
 			"docker_repository": {
-				Description: "Docker Repository URL (e.g. 112233445566.dkr.ecr.us-east-1.amazonaws.com/source-custom) or DockerHub identifier (e.g. airbyte/source-postgres)",
+				Description: "Docker Repository URL (e.g. 112233445566.dkr.ecr.us-east-1.amazonaws.com/destination-custom) or DockerHub identifier (e.g. airbyte/destination-postgres)",
 				Type:        types.StringType,
 				Required:    true,
 				PlanModifiers: tfsdk.AttributePlanModifiers{
@@ -162,7 +162,7 @@ func (r *DestinationDefinitionResource) Configure(ctx context.Context, req resou
 
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
+			"Unexpected Data Destination Configure Type",
 			fmt.Sprintf("Expected *apiclient.ApiClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
@@ -181,13 +181,13 @@ func (r *DestinationDefinitionResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	newDestinationDefinition := getCommonConnectorDefinitionFields(plan)
+	newDestinationDefinition := GetCommonConnectorDefinitionFields(plan)
 
-	destinationDefinition, err := r.client.CreateConnectorDefinition(newDestinationDefinition, apiclient.SourceType)
+	destinationDefinition, err := r.client.CreateConnectorDefinition(newDestinationDefinition, apiclient.DestinationType)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error creating Source Definition",
-			"Could not create Source Definition, unexpected error: "+err.Error(),
+			"Error creating Destination Definition",
+			"Could not create Destination Definition, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -195,8 +195,8 @@ func (r *DestinationDefinitionResource) Create(ctx context.Context, req resource
 	state, err := FlattenConnectorDefinition(destinationDefinition)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error creating Source Definition",
-			"Could not create Source Definition, unexpected error: "+err.Error(),
+			"Error creating Destination Definition",
+			"Could not create Destination Definition, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -215,15 +215,15 @@ func (r *DestinationDefinitionResource) Read(ctx context.Context, req resource.R
 
 	destinationDefinitionId := plan.Id.Value
 
-	destinationDefinition, err := r.client.GetConnectorDefinitionById(destinationDefinitionId, apiclient.SourceType)
+	destinationDefinition, err := r.client.GetConnectorDefinitionById(destinationDefinitionId, apiclient.DestinationType)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Source Definition, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Destination Definition, got error: %s", err))
 		return
 	}
 
 	state, err := FlattenConnectorDefinition(destinationDefinition)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Source Definition, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Destination Definition, got error: %s", err))
 		return
 	}
 
@@ -247,11 +247,11 @@ func (r *DestinationDefinitionResource) Update(ctx context.Context, req resource
 		ResourceRequirements: getResourceRequirementFields(plan),
 	}
 
-	destinationDefinition, err := r.client.UpdateConnectorDefinition(updatedDestinationDefinition, apiclient.SourceType)
+	destinationDefinition, err := r.client.UpdateConnectorDefinition(updatedDestinationDefinition, apiclient.DestinationType)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error updating destinationDefinition",
-			"Could not update Source Definition, unexpected error: "+err.Error(),
+			"Error updating Destination Definition",
+			"Could not update Destination Definition, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -271,11 +271,11 @@ func (r *DestinationDefinitionResource) Delete(ctx context.Context, req resource
 	}
 
 	destinationDefinitionId := state.Id.Value
-	err := r.client.DeleteConnectorDefinition(destinationDefinitionId, apiclient.SourceType)
+	err := r.client.DeleteConnectorDefinition(destinationDefinitionId, apiclient.DestinationType)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error updating destinationDefinition",
-			"Could not update Source Definition, unexpected error: "+err.Error(),
+			"Error updating Destination Definition",
+			"Could not update Destination Definition, unexpected error: "+err.Error(),
 		)
 	}
 }

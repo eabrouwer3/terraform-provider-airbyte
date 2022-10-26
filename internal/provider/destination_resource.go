@@ -12,35 +12,35 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &SourceResource{}
-var _ resource.ResourceWithImportState = &SourceResource{}
+var _ resource.Resource = &DestinationResource{}
+var _ resource.ResourceWithImportState = &DestinationResource{}
 
-func NewSourceResource() resource.Resource {
-	return &SourceResource{}
+func NewDestinationResource() resource.Resource {
+	return &DestinationResource{}
 }
 
-// SourceResource defines the resource implementation.
-type SourceResource struct {
+// DestinationResource defines the resource implementation.
+type DestinationResource struct {
 	client *apiclient.ApiClient
 }
 
-func (r *SourceResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_source"
+func (r *DestinationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_destination"
 }
 
-func (r *SourceResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (r *DestinationResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Source resource",
+		MarkdownDescription: "Destination resource",
 
 		Attributes: map[string]tfsdk.Attribute{
 			"id": {
-				Description: "Source ID",
+				Description: "Destination ID",
 				Type:        types.StringType,
 				Computed:    true,
 			},
 			"definition_id": {
-				Description: "Source Definition ID",
+				Description: "Destination Definition ID",
 				Type:        types.StringType,
 				Required:    true,
 				PlanModifiers: tfsdk.AttributePlanModifiers{
@@ -56,7 +56,7 @@ func (r *SourceResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diag
 				},
 			},
 			"name": {
-				Description: "Source Name",
+				Description: "Destination Name",
 				Type:        types.StringType,
 				Required:    true,
 			},
@@ -66,7 +66,7 @@ func (r *SourceResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diag
 				Required:    true,
 			},
 			"definition_name": {
-				Description: "Source Definition Name",
+				Description: "Destination Definition Name",
 				Type:        types.StringType,
 				Computed:    true,
 			},
@@ -79,7 +79,7 @@ func (r *SourceResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diag
 	}, nil
 }
 
-func (r *SourceResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *DestinationResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -89,7 +89,7 @@ func (r *SourceResource) Configure(ctx context.Context, req resource.ConfigureRe
 
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
+			"Unexpected Data Destination Configure Type",
 			fmt.Sprintf("Expected *apiclient.ApiClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
@@ -99,7 +99,7 @@ func (r *SourceResource) Configure(ctx context.Context, req resource.ConfigureRe
 	r.client = &client
 }
 
-func (r *SourceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *DestinationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan ConnectorModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -108,9 +108,9 @@ func (r *SourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	newSource := apiclient.NewConnector{
-		SourceDefinitionIdBody: apiclient.SourceDefinitionIdBody{
-			SourceDefinitionId: plan.DefinitionId.Value,
+	newDestination := apiclient.NewConnector{
+		DestinationDefinitionIdBody: apiclient.DestinationDefinitionIdBody{
+			DestinationDefinitionId: plan.DefinitionId.Value,
 		},
 		WorkspaceIdBody: apiclient.WorkspaceIdBody{
 			WorkspaceId: plan.WorkspaceId.Value,
@@ -118,20 +118,20 @@ func (r *SourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		CommonConnectorFields: GetCommonConnectorFields(plan),
 	}
 
-	source, err := r.client.CreateConnector(newSource, apiclient.SourceType)
+	destination, err := r.client.CreateConnector(newDestination, apiclient.DestinationType)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error creating Source",
-			"Could not create Source, unexpected error: "+err.Error(),
+			"Error creating Destination",
+			"Could not create Destination, unexpected error: "+err.Error(),
 		)
 		return
 	}
 
-	state, err := FlattenConnector(source)
+	state, err := FlattenConnector(destination)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error creating Source",
-			"Could not create Source, unexpected error: "+err.Error(),
+			"Error creating Destination",
+			"Could not create Destination, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -139,7 +139,7 @@ func (r *SourceResource) Create(ctx context.Context, req resource.CreateRequest,
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
-func (r *SourceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *DestinationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var plan ConnectorModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &plan)...)
@@ -148,19 +148,19 @@ func (r *SourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	sourceId := plan.Id.Value
+	destinationId := plan.Id.Value
 
-	source, err := r.client.GetConnectorById(sourceId, apiclient.SourceType)
+	destination, err := r.client.GetConnectorById(destinationId, apiclient.DestinationType)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Source, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Destination, got error: %s", err))
 		return
 	}
 
-	state, err := FlattenConnector(source)
+	state, err := FlattenConnector(destination)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Client Error",
-			fmt.Sprintf("Unable to read Source, got error: %s", err),
+			fmt.Sprintf("Unable to read Destination, got error: %s", err),
 		)
 		return
 	}
@@ -168,7 +168,7 @@ func (r *SourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
-func (r *SourceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *DestinationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan ConnectorModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -177,25 +177,25 @@ func (r *SourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	updatedSource := apiclient.UpdatedConnector{
-		SourceIdBody:       apiclient.SourceIdBody{SourceId: plan.Id.Value},
+	updatedDestination := apiclient.UpdatedConnector{
+		DestinationIdBody:     apiclient.DestinationIdBody{DestinationId: plan.Id.Value},
 		CommonConnectorFields: GetCommonConnectorFields(plan),
 	}
 
-	source, err := r.client.UpdateConnector(updatedSource, apiclient.SourceType)
+	destination, err := r.client.UpdateConnector(updatedDestination, apiclient.DestinationType)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error updating source",
-			"Could not update Source, unexpected error: "+err.Error(),
+			"Error updating destination",
+			"Could not update Destination, unexpected error: "+err.Error(),
 		)
 		return
 	}
 
-	state, err := FlattenConnector(source)
+	state, err := FlattenConnector(destination)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error updating source",
-			"Could not update Source, unexpected error: "+err.Error(),
+			"Error updating destination",
+			"Could not update Destination, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -203,7 +203,7 @@ func (r *SourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
-func (r *SourceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *DestinationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state ConnectorModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -212,16 +212,16 @@ func (r *SourceResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	sourceId := state.Id.Value
-	err := r.client.DeleteConnector(sourceId, apiclient.SourceType)
+	destinationId := state.Id.Value
+	err := r.client.DeleteConnector(destinationId, apiclient.DestinationType)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error updating source",
-			"Could not update Source, unexpected error: "+err.Error(),
+			"Error updating destination",
+			"Could not update Destination, unexpected error: "+err.Error(),
 		)
 	}
 }
 
-func (r *SourceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *DestinationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
