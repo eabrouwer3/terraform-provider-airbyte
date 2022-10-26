@@ -1,12 +1,13 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-provider-scaffolding-framework/internal/apiclient"
 )
 
-// SourceDefinitionModel describes the data source data model.
-type SourceDefinitionModel struct {
+// ConnectorDefinitionModel describes the data source data model.
+type ConnectorDefinitionModel struct {
 	Id                              types.String                        `tfsdk:"id"`
 	Name                            types.String                        `tfsdk:"name"`
 	DockerRepository                types.String                        `tfsdk:"docker_repository"`
@@ -15,7 +16,6 @@ type SourceDefinitionModel struct {
 	ProtocolVersion                 types.String                        `tfsdk:"protocol_version"`
 	ReleaseStage                    types.String                        `tfsdk:"release_stage"`
 	ReleaseDate                     types.String                        `tfsdk:"release_date"`
-	SourceType                      types.String                        `tfsdk:"source_type"`
 	DefaultResourceRequirements     *resourceRequirementsModel          `tfsdk:"default_resource_requirements"`
 	JobSpecificResourceRequirements *[]jobSpecResourceRequirementsModel `tfsdk:"job_specific_resource_requirements"`
 }
@@ -35,20 +35,25 @@ type jobSpecResourceRequirementsModel struct {
 	MemoryLimit   types.String `tfsdk:"memory_limit"`
 }
 
-func FlattenSourceDefinition(sourceDefinition *apiclient.SourceDefinition) SourceDefinitionModel {
-	var data SourceDefinitionModel
+func FlattenConnectorDefinition(connectorDefinition *apiclient.ConnectorDefinition) (*ConnectorDefinitionModel, error) {
+	var data ConnectorDefinitionModel
 
-	data.Id = types.String{Value: sourceDefinition.SourceDefinitionId}
-	data.Name = types.String{Value: sourceDefinition.Name}
-	data.DockerRepository = types.String{Value: sourceDefinition.DockerRepository}
-	data.DockerImageTag = types.String{Value: sourceDefinition.DockerImageTag}
-	data.DocumentationUrl = types.String{Value: sourceDefinition.DocumentationUrl}
-	data.ProtocolVersion = types.String{Value: sourceDefinition.ProtocolVersion}
-	data.ReleaseStage = types.String{Value: sourceDefinition.ReleaseStage}
-	data.SourceType = types.String{Value: sourceDefinition.SourceType}
+	if connectorDefinition.SourceDefinitionId != "" {
+		data.Id = types.String{Value: connectorDefinition.SourceDefinitionId}
+	} else if connectorDefinition.DestinationDefinitionId != "" {
+		data.Id = types.String{Value: connectorDefinition.DestinationDefinitionId}
+	} else {
+		return nil, fmt.Errorf("either SourceDefinitionId or DestinationDefinitionId must be set, not empty")
+	}
+	data.Name = types.String{Value: connectorDefinition.Name}
+	data.DockerRepository = types.String{Value: connectorDefinition.DockerRepository}
+	data.DockerImageTag = types.String{Value: connectorDefinition.DockerImageTag}
+	data.DocumentationUrl = types.String{Value: connectorDefinition.DocumentationUrl}
+	data.ProtocolVersion = types.String{Value: connectorDefinition.ProtocolVersion}
+	data.ReleaseStage = types.String{Value: connectorDefinition.ReleaseStage}
 
-	if sourceDefinition.ResourceRequirements != nil {
-		if reqs := sourceDefinition.ResourceRequirements.Default; reqs != nil {
+	if connectorDefinition.ResourceRequirements != nil {
+		if reqs := connectorDefinition.ResourceRequirements.Default; reqs != nil {
 			req := resourceRequirementsModel{}
 			if reqs.CPURequest != "" {
 				req.CPURequest = types.String{Value: reqs.CPURequest}
@@ -73,7 +78,7 @@ func FlattenSourceDefinition(sourceDefinition *apiclient.SourceDefinition) Sourc
 			data.DefaultResourceRequirements = &req
 		}
 
-		if reqs := *sourceDefinition.ResourceRequirements.JobSpecific; len(reqs) > 0 {
+		if reqs := *connectorDefinition.ResourceRequirements.JobSpecific; len(reqs) > 0 {
 			var reqData []jobSpecResourceRequirementsModel
 			for _, req := range reqs {
 				jobReq := jobSpecResourceRequirementsModel{
@@ -105,5 +110,64 @@ func FlattenSourceDefinition(sourceDefinition *apiclient.SourceDefinition) Sourc
 		}
 	}
 
-	return data
+	return &data, nil
+}
+
+func getCommonConnectorDefinitionFields(data ConnectorDefinitionModel) apiclient.CommonConnectorDefinitionFields {
+	return apiclient.CommonConnectorDefinitionFields{
+		Name:                 data.Name.Value,
+		DockerRepository:     data.DockerRepository.Value,
+		DockerImageTag:       data.DockerImageTag.Value,
+		DocumentationUrl:     data.DocumentationUrl.Value,
+		ResourceRequirements: getResourceRequirementFields(data),
+	}
+}
+
+func getResourceRequirementFields(data ConnectorDefinitionModel) *apiclient.ResourceRequirements {
+	if data.DefaultResourceRequirements != nil || data.JobSpecificResourceRequirements != nil {
+		reqBody := apiclient.ResourceRequirements{}
+
+		if data.DefaultResourceRequirements != nil {
+			reqs := apiclient.ResourceRequirementsOptions{}
+			if v := data.DefaultResourceRequirements.CPURequest; !v.IsUnknown() {
+				reqs.CPURequest = v.Value
+			}
+			if v := data.DefaultResourceRequirements.CPULimit; !v.IsUnknown() {
+				reqs.CPULimit = v.Value
+			}
+			if v := data.DefaultResourceRequirements.MemoryRequest; !v.IsUnknown() {
+				reqs.MemoryRequest = v.Value
+			}
+			if v := data.DefaultResourceRequirements.MemoryLimit; !v.IsUnknown() {
+				reqs.MemoryLimit = v.Value
+			}
+			reqBody.Default = &reqs
+		}
+
+		if data.JobSpecificResourceRequirements != nil {
+			var reqs []apiclient.JobSpecificResourceRequirements
+			for _, req := range *data.JobSpecificResourceRequirements {
+				js := apiclient.JobSpecificResourceRequirements{
+					JobType: req.JobType.Value,
+				}
+				if !req.CPURequest.IsUnknown() {
+					js.ResourceRequirements.CPURequest = req.CPURequest.Value
+				}
+				if !req.CPULimit.IsUnknown() {
+					js.ResourceRequirements.CPULimit = req.CPULimit.Value
+				}
+				if !req.MemoryRequest.IsUnknown() {
+					js.ResourceRequirements.MemoryRequest = req.MemoryRequest.Value
+				}
+				if !req.MemoryLimit.IsUnknown() {
+					js.ResourceRequirements.MemoryLimit = req.MemoryLimit.Value
+				}
+				reqs = append(reqs, js)
+			}
+			reqBody.JobSpecific = &reqs
+		}
+
+		return &reqBody
+	}
+	return nil
 }

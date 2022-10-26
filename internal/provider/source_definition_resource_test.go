@@ -8,7 +8,7 @@ import (
 )
 
 func TestAccResourceSourceDefinition_basic(t *testing.T) {
-	resource.UnitTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		//CheckDestroy:             testAccResourceSourceDefinitionDestroy,
@@ -30,7 +30,7 @@ func TestAccResourceSourceDefinition_basic(t *testing.T) {
 }
 
 func TestAccResourceSourceDefinition_complex(t *testing.T) {
-	resource.UnitTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{

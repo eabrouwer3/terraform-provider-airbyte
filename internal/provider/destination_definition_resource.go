@@ -13,26 +13,26 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ resource.Resource = &SourceDefinitionResource{}
-var _ resource.ResourceWithImportState = &SourceDefinitionResource{}
+var _ resource.Resource = &DestinationDefinitionResource{}
+var _ resource.ResourceWithImportState = &DestinationDefinitionResource{}
 
-func NewSourceDefinitionResource() resource.Resource {
-	return &SourceDefinitionResource{}
+func NewDestinationDefinitionResource() resource.Resource {
+	return &DestinationDefinitionResource{}
 }
 
-// SourceDefinitionResource defines the resource implementation.
-type SourceDefinitionResource struct {
+// DestinationDefinitionResource defines the resource implementation.
+type DestinationDefinitionResource struct {
 	client *apiclient.ApiClient
 }
 
-func (r *SourceDefinitionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_source_definition"
+func (r *DestinationDefinitionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_destination_definition"
 }
 
-func (r *SourceDefinitionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (r *DestinationDefinitionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "SourceDefinition resource",
+		MarkdownDescription: "DestinationDefinition resource",
 
 		Attributes: map[string]tfsdk.Attribute{
 			"id": {
@@ -152,7 +152,7 @@ func (r *SourceDefinitionResource) GetSchema(ctx context.Context) (tfsdk.Schema,
 	}, nil
 }
 
-func (r *SourceDefinitionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *DestinationDefinitionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -172,7 +172,7 @@ func (r *SourceDefinitionResource) Configure(ctx context.Context, req resource.C
 	r.client = &client
 }
 
-func (r *SourceDefinitionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *DestinationDefinitionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan ConnectorDefinitionModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -181,9 +181,9 @@ func (r *SourceDefinitionResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	newSourceDefinition := getCommonConnectorDefinitionFields(plan)
+	newDestinationDefinition := getCommonConnectorDefinitionFields(plan)
 
-	sourceDefinition, err := r.client.CreateConnectorDefinition(newSourceDefinition, apiclient.SourceType)
+	destinationDefinition, err := r.client.CreateConnectorDefinition(newDestinationDefinition, apiclient.SourceType)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating Source Definition",
@@ -192,7 +192,7 @@ func (r *SourceDefinitionResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	state, err := FlattenConnectorDefinition(sourceDefinition)
+	state, err := FlattenConnectorDefinition(destinationDefinition)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating Source Definition",
@@ -204,7 +204,7 @@ func (r *SourceDefinitionResource) Create(ctx context.Context, req resource.Crea
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
-func (r *SourceDefinitionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *DestinationDefinitionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var plan ConnectorDefinitionModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &plan)...)
@@ -213,15 +213,15 @@ func (r *SourceDefinitionResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	sourceDefinitionId := plan.Id.Value
+	destinationDefinitionId := plan.Id.Value
 
-	sourceDefinition, err := r.client.GetConnectorDefinitionById(sourceDefinitionId, apiclient.SourceType)
+	destinationDefinition, err := r.client.GetConnectorDefinitionById(destinationDefinitionId, apiclient.SourceType)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Source Definition, got error: %s", err))
 		return
 	}
 
-	state, err := FlattenConnectorDefinition(sourceDefinition)
+	state, err := FlattenConnectorDefinition(destinationDefinition)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Source Definition, got error: %s", err))
 		return
@@ -230,7 +230,7 @@ func (r *SourceDefinitionResource) Read(ctx context.Context, req resource.ReadRe
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
-func (r *SourceDefinitionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *DestinationDefinitionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan ConnectorDefinitionModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -239,29 +239,29 @@ func (r *SourceDefinitionResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	updatedSourceDefinition := apiclient.UpdatedConnectorDefinition{
-		SourceDefinitionIdBody: apiclient.SourceDefinitionIdBody{
-			SourceDefinitionId: plan.Id.Value,
+	updatedDestinationDefinition := apiclient.UpdatedConnectorDefinition{
+		DestinationDefinitionIdBody: apiclient.DestinationDefinitionIdBody{
+			DestinationDefinitionId: plan.Id.Value,
 		},
 		DockerImageTag:       plan.DockerImageTag.Value,
 		ResourceRequirements: getResourceRequirementFields(plan),
 	}
 
-	sourceDefinition, err := r.client.UpdateConnectorDefinition(updatedSourceDefinition, apiclient.SourceType)
+	destinationDefinition, err := r.client.UpdateConnectorDefinition(updatedDestinationDefinition, apiclient.SourceType)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error updating sourceDefinition",
+			"Error updating destinationDefinition",
 			"Could not update Source Definition, unexpected error: "+err.Error(),
 		)
 		return
 	}
 
-	state, err := FlattenConnectorDefinition(sourceDefinition)
+	state, err := FlattenConnectorDefinition(destinationDefinition)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
 
-func (r *SourceDefinitionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *DestinationDefinitionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state ConnectorDefinitionModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -270,16 +270,16 @@ func (r *SourceDefinitionResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
-	sourceDefinitionId := state.Id.Value
-	err := r.client.DeleteConnectorDefinition(sourceDefinitionId, apiclient.SourceType)
+	destinationDefinitionId := state.Id.Value
+	err := r.client.DeleteConnectorDefinition(destinationDefinitionId, apiclient.SourceType)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error updating sourceDefinition",
+			"Error updating destinationDefinition",
 			"Could not update Source Definition, unexpected error: "+err.Error(),
 		)
 	}
 }
 
-func (r *SourceDefinitionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *DestinationDefinitionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
