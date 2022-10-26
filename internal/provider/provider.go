@@ -78,7 +78,7 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 	}
 
 	if !data.HostUrl.IsNull() {
-		hostUrl = data.HostUrl.Value
+		hostUrl = data.HostUrl.ValueString()
 	}
 
 	if hostUrl == "" {

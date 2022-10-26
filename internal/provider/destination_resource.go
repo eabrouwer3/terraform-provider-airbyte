@@ -110,10 +110,10 @@ func (r *DestinationResource) Create(ctx context.Context, req resource.CreateReq
 
 	newDestination := apiclient.NewConnector{
 		DestinationDefinitionIdBody: apiclient.DestinationDefinitionIdBody{
-			DestinationDefinitionId: plan.DefinitionId.Value,
+			DestinationDefinitionId: plan.DefinitionId.ValueString(),
 		},
 		WorkspaceIdBody: apiclient.WorkspaceIdBody{
-			WorkspaceId: plan.WorkspaceId.Value,
+			WorkspaceId: plan.WorkspaceId.ValueString(),
 		},
 		CommonConnectorFields: GetCommonConnectorFields(plan),
 	}
@@ -148,7 +148,7 @@ func (r *DestinationResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	destinationId := plan.Id.Value
+	destinationId := plan.Id.ValueString()
 
 	destination, err := r.client.GetConnectorById(destinationId, apiclient.DestinationType)
 	if err != nil {
@@ -178,7 +178,7 @@ func (r *DestinationResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	updatedDestination := apiclient.UpdatedConnector{
-		DestinationIdBody:     apiclient.DestinationIdBody{DestinationId: plan.Id.Value},
+		DestinationIdBody:     apiclient.DestinationIdBody{DestinationId: plan.Id.ValueString()},
 		CommonConnectorFields: GetCommonConnectorFields(plan),
 	}
 
@@ -212,7 +212,7 @@ func (r *DestinationResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	destinationId := state.Id.Value
+	destinationId := state.Id.ValueString()
 	err := r.client.DeleteConnector(destinationId, apiclient.DestinationType)
 	if err != nil {
 		resp.Diagnostics.AddError(

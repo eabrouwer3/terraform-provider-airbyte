@@ -174,8 +174,8 @@ func (d *WorkspaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	workspaceId := config.Id.Value
-	slug := config.Slug.Value
+	workspaceId := config.Id.ValueString()
+	slug := config.Slug.ValueString()
 
 	if workspaceId != "" && slug != "" {
 		resp.Diagnostics.AddError(

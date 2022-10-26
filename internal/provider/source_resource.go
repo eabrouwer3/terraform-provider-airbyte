@@ -110,10 +110,10 @@ func (r *SourceResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	newSource := apiclient.NewConnector{
 		SourceDefinitionIdBody: apiclient.SourceDefinitionIdBody{
-			SourceDefinitionId: plan.DefinitionId.Value,
+			SourceDefinitionId: plan.DefinitionId.ValueString(),
 		},
 		WorkspaceIdBody: apiclient.WorkspaceIdBody{
-			WorkspaceId: plan.WorkspaceId.Value,
+			WorkspaceId: plan.WorkspaceId.ValueString(),
 		},
 		CommonConnectorFields: GetCommonConnectorFields(plan),
 	}
@@ -148,7 +148,7 @@ func (r *SourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	sourceId := plan.Id.Value
+	sourceId := plan.Id.ValueString()
 
 	source, err := r.client.GetConnectorById(sourceId, apiclient.SourceType)
 	if err != nil {
@@ -178,7 +178,7 @@ func (r *SourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	updatedSource := apiclient.UpdatedConnector{
-		SourceIdBody:       apiclient.SourceIdBody{SourceId: plan.Id.Value},
+		SourceIdBody:          apiclient.SourceIdBody{SourceId: plan.Id.ValueString()},
 		CommonConnectorFields: GetCommonConnectorFields(plan),
 	}
 
@@ -212,7 +212,7 @@ func (r *SourceResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	sourceId := state.Id.Value
+	sourceId := state.Id.ValueString()
 	err := r.client.DeleteConnector(sourceId, apiclient.SourceType)
 	if err != nil {
 		resp.Diagnostics.AddError(

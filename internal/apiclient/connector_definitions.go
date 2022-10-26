@@ -54,8 +54,8 @@ type ResourceRequirementsOptions struct {
 }
 
 type JobSpecificResourceRequirements struct {
-	JobType              string                      `json:"jobType"`
-	ResourceRequirements ResourceRequirementsOptions `json:"resourceRequirements"`
+	JobType              string                       `json:"jobType"`
+	ResourceRequirements *ResourceRequirementsOptions `json:"resourceRequirements"`
 }
 
 type ConnectorType int

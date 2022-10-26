@@ -24,33 +24,33 @@ func FlattenConnector(connector *apiclient.Connector) (*ConnectorModel, error) {
 	var data ConnectorModel
 
 	if connector.SourceId != "" {
-		data.Id = types.String{Value: connector.SourceId}
-		data.DefinitionId = types.String{Value: connector.SourceDefinitionId}
-		data.DefinitionName = types.String{Value: connector.SourceName}
+		data.Id = types.StringValue(connector.SourceId)
+		data.DefinitionId = types.StringValue(connector.SourceDefinitionId)
+		data.DefinitionName = types.StringValue(connector.SourceName)
 	} else if connector.DestinationId != "" {
-		data.Id = types.String{Value: connector.DestinationId}
-		data.DefinitionId = types.String{Value: connector.DestinationDefinitionId}
-		data.DefinitionName = types.String{Value: connector.DestinationName}
+		data.Id = types.StringValue(connector.DestinationId)
+		data.DefinitionId = types.StringValue(connector.DestinationDefinitionId)
+		data.DefinitionName = types.StringValue(connector.DestinationName)
 	} else {
 		return nil, fmt.Errorf("either SourceId or DestinationId must be set, not empty")
 	}
 
-	data.WorkspaceId = types.String{Value: connector.WorkspaceId}
-	data.Name = types.String{Value: connector.Name}
-	data.Icon = types.String{Value: connector.Icon}
+	data.WorkspaceId = types.StringValue(connector.WorkspaceId)
+	data.Name = types.StringValue(connector.Name)
+	data.Icon = types.StringValue(connector.Icon)
 
 	config, err := connector.ConnectionConfiguration.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
-	data.ConnectionConfiguration = types.String{Value: string(config)}
+	data.ConnectionConfiguration = types.StringValue(string(config))
 
 	return &data, nil
 }
 
 func GetCommonConnectorFields(data ConnectorModel) apiclient.CommonConnectorFields {
 	return apiclient.CommonConnectorFields{
-		Name:                    data.Name.Value,
-		ConnectionConfiguration: json.RawMessage(data.ConnectionConfiguration.Value),
+		Name:                    data.Name.ValueString(),
+		ConnectionConfiguration: json.RawMessage(data.ConnectionConfiguration.ValueString()),
 	}
 }

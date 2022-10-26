@@ -16,93 +16,54 @@ type ConnectorDefinitionModel struct {
 	ProtocolVersion                 types.String                        `tfsdk:"protocol_version"`
 	ReleaseStage                    types.String                        `tfsdk:"release_stage"`
 	ReleaseDate                     types.String                        `tfsdk:"release_date"`
-	DefaultResourceRequirements     *resourceRequirementsModel          `tfsdk:"default_resource_requirements"`
-	JobSpecificResourceRequirements *[]jobSpecResourceRequirementsModel `tfsdk:"job_specific_resource_requirements"`
+	DefaultResourceRequirements     *ResourceRequirementsModel          `tfsdk:"default_resource_requirements"`
+	JobSpecificResourceRequirements *[]JobSpecResourceRequirementsModel `tfsdk:"job_specific_resource_requirements"`
 }
 
-type resourceRequirementsModel struct {
+type ResourceRequirementsFields struct {
 	CPURequest    types.String `tfsdk:"cpu_request"`
 	CPULimit      types.String `tfsdk:"cpu_limit"`
 	MemoryRequest types.String `tfsdk:"memory_request"`
 	MemoryLimit   types.String `tfsdk:"memory_limit"`
 }
 
-type jobSpecResourceRequirementsModel struct {
-	JobType       types.String `tfsdk:"job_type"`
-	CPURequest    types.String `tfsdk:"cpu_request"`
-	CPULimit      types.String `tfsdk:"cpu_limit"`
-	MemoryRequest types.String `tfsdk:"memory_request"`
-	MemoryLimit   types.String `tfsdk:"memory_limit"`
+type ResourceRequirementsModel = ResourceRequirementsFields
+
+type JobSpecResourceRequirementsModel struct {
+	JobType types.String `tfsdk:"job_type"`
+	ResourceRequirementsFields
 }
 
 func FlattenConnectorDefinition(connectorDefinition *apiclient.ConnectorDefinition) (*ConnectorDefinitionModel, error) {
 	var data ConnectorDefinitionModel
 
 	if connectorDefinition.SourceDefinitionId != "" {
-		data.Id = types.String{Value: connectorDefinition.SourceDefinitionId}
+		data.Id = types.StringValue(connectorDefinition.SourceDefinitionId)
 	} else if connectorDefinition.DestinationDefinitionId != "" {
-		data.Id = types.String{Value: connectorDefinition.DestinationDefinitionId}
+		data.Id = types.StringValue(connectorDefinition.DestinationDefinitionId)
 	} else {
 		return nil, fmt.Errorf("either SourceDefinitionId or DestinationDefinitionId must be set, not empty")
 	}
-	data.Name = types.String{Value: connectorDefinition.Name}
-	data.DockerRepository = types.String{Value: connectorDefinition.DockerRepository}
-	data.DockerImageTag = types.String{Value: connectorDefinition.DockerImageTag}
-	data.DocumentationUrl = types.String{Value: connectorDefinition.DocumentationUrl}
-	data.ProtocolVersion = types.String{Value: connectorDefinition.ProtocolVersion}
-	data.ReleaseStage = types.String{Value: connectorDefinition.ReleaseStage}
+	data.Name = types.StringValue(connectorDefinition.Name)
+	data.DockerRepository = types.StringValue(connectorDefinition.DockerRepository)
+	data.DockerImageTag = types.StringValue(connectorDefinition.DockerImageTag)
+	data.DocumentationUrl = types.StringValue(connectorDefinition.DocumentationUrl)
+	data.ProtocolVersion = types.StringValue(connectorDefinition.ProtocolVersion)
+	data.ReleaseStage = types.StringValue(connectorDefinition.ReleaseStage)
 
 	if connectorDefinition.ResourceRequirements != nil {
 		if reqs := connectorDefinition.ResourceRequirements.Default; reqs != nil {
-			req := resourceRequirementsModel{}
-			if reqs.CPURequest != "" {
-				req.CPURequest = types.String{Value: reqs.CPURequest}
-			} else {
-				req.CPURequest = types.String{Null: true}
-			}
-			if reqs.CPULimit != "" {
-				req.CPULimit = types.String{Value: reqs.CPULimit}
-			} else {
-				req.CPULimit = types.String{Null: true}
-			}
-			if reqs.MemoryRequest != "" {
-				req.MemoryRequest = types.String{Value: reqs.MemoryRequest}
-			} else {
-				req.MemoryRequest = types.String{Null: true}
-			}
-			if reqs.MemoryLimit != "" {
-				req.MemoryLimit = types.String{Value: reqs.MemoryLimit}
-			} else {
-				req.MemoryLimit = types.String{Null: true}
-			}
+			req := ResourceRequirementsModel{}
+
 			data.DefaultResourceRequirements = &req
 		}
 
 		if reqs := *connectorDefinition.ResourceRequirements.JobSpecific; len(reqs) > 0 {
-			var reqData []jobSpecResourceRequirementsModel
+			var reqData []JobSpecResourceRequirementsModel
 			for _, req := range reqs {
-				jobReq := jobSpecResourceRequirementsModel{
-					JobType: types.String{Value: req.JobType},
-				}
-				if req.ResourceRequirements.CPURequest != "" {
-					jobReq.CPURequest = types.String{Value: req.ResourceRequirements.CPURequest}
-				} else {
-					jobReq.CPURequest = types.String{Null: true}
-				}
-				if req.ResourceRequirements.CPULimit != "" {
-					jobReq.CPULimit = types.String{Value: req.ResourceRequirements.CPULimit}
-				} else {
-					jobReq.CPULimit = types.String{Null: true}
-				}
-				if req.ResourceRequirements.MemoryRequest != "" {
-					jobReq.MemoryRequest = types.String{Value: req.ResourceRequirements.MemoryRequest}
-				} else {
-					jobReq.MemoryRequest = types.String{Null: true}
-				}
-				if req.ResourceRequirements.MemoryLimit != "" {
-					jobReq.MemoryLimit = types.String{Value: req.ResourceRequirements.MemoryLimit}
-				} else {
-					jobReq.MemoryLimit = types.String{Null: true}
+				jobReq := JobSpecResourceRequirementsModel{
+					JobType:                    types.StringValue(req.JobType),
+					ResourceRequirementsFields: *FlattenResourceRequirements(req.ResourceRequirements),
 				}
 				reqData = append(reqData, jobReq)
 			}
@@ -113,54 +74,75 @@ func FlattenConnectorDefinition(connectorDefinition *apiclient.ConnectorDefiniti
 	return &data, nil
 }
 
+func FlattenResourceRequirements(options *apiclient.ResourceRequirementsOptions) *ResourceRequirementsFields {
+	req := ResourceRequirementsFields{}
+
+	if options.CPURequest != "" {
+		req.CPURequest = types.StringValue(options.CPURequest)
+	} else {
+		req.CPURequest = types.StringNull()
+	}
+	if options.CPULimit != "" {
+		req.CPULimit = types.StringValue(options.CPULimit)
+	} else {
+		req.CPULimit = types.StringNull()
+	}
+	if options.MemoryRequest != "" {
+		req.MemoryRequest = types.StringValue(options.MemoryRequest)
+	} else {
+		req.MemoryRequest = types.StringNull()
+	}
+	if options.MemoryLimit != "" {
+		req.MemoryLimit = types.StringValue(options.MemoryLimit)
+	} else {
+		req.MemoryLimit = types.StringNull()
+	}
+
+	return &req
+}
+
 func GetCommonConnectorDefinitionFields(data ConnectorDefinitionModel) apiclient.CommonConnectorDefinitionFields {
 	return apiclient.CommonConnectorDefinitionFields{
-		Name:                 data.Name.Value,
-		DockerRepository:     data.DockerRepository.Value,
-		DockerImageTag:       data.DockerImageTag.Value,
-		DocumentationUrl:     data.DocumentationUrl.Value,
+		Name:                 data.Name.ValueString(),
+		DockerRepository:     data.DockerRepository.ValueString(),
+		DockerImageTag:       data.DockerImageTag.ValueString(),
+		DocumentationUrl:     data.DocumentationUrl.ValueString(),
 		ResourceRequirements: getResourceRequirementFields(data),
 	}
+}
+
+func getResourceRequirementOptions(model *ResourceRequirementsFields) *apiclient.ResourceRequirementsOptions {
+	if model != nil {
+		reqs := apiclient.ResourceRequirementsOptions{}
+		if v := model.CPURequest; !v.IsUnknown() {
+			reqs.CPURequest = v.ValueString()
+		}
+		if v := model.CPULimit; !v.IsUnknown() {
+			reqs.CPULimit = v.ValueString()
+		}
+		if v := model.MemoryRequest; !v.IsUnknown() {
+			reqs.MemoryRequest = v.ValueString()
+		}
+		if v := model.MemoryLimit; !v.IsUnknown() {
+			reqs.MemoryLimit = v.ValueString()
+		}
+		return &reqs
+	}
+	return nil
 }
 
 func getResourceRequirementFields(data ConnectorDefinitionModel) *apiclient.ResourceRequirements {
 	if data.DefaultResourceRequirements != nil || data.JobSpecificResourceRequirements != nil {
 		reqBody := apiclient.ResourceRequirements{}
 
-		if data.DefaultResourceRequirements != nil {
-			reqs := apiclient.ResourceRequirementsOptions{}
-			if v := data.DefaultResourceRequirements.CPURequest; !v.IsUnknown() {
-				reqs.CPURequest = v.Value
-			}
-			if v := data.DefaultResourceRequirements.CPULimit; !v.IsUnknown() {
-				reqs.CPULimit = v.Value
-			}
-			if v := data.DefaultResourceRequirements.MemoryRequest; !v.IsUnknown() {
-				reqs.MemoryRequest = v.Value
-			}
-			if v := data.DefaultResourceRequirements.MemoryLimit; !v.IsUnknown() {
-				reqs.MemoryLimit = v.Value
-			}
-			reqBody.Default = &reqs
-		}
+		reqBody.Default = getResourceRequirementOptions(data.DefaultResourceRequirements)
 
 		if data.JobSpecificResourceRequirements != nil {
 			var reqs []apiclient.JobSpecificResourceRequirements
 			for _, req := range *data.JobSpecificResourceRequirements {
 				js := apiclient.JobSpecificResourceRequirements{
-					JobType: req.JobType.Value,
-				}
-				if !req.CPURequest.IsUnknown() {
-					js.ResourceRequirements.CPURequest = req.CPURequest.Value
-				}
-				if !req.CPULimit.IsUnknown() {
-					js.ResourceRequirements.CPULimit = req.CPULimit.Value
-				}
-				if !req.MemoryRequest.IsUnknown() {
-					js.ResourceRequirements.MemoryRequest = req.MemoryRequest.Value
-				}
-				if !req.MemoryLimit.IsUnknown() {
-					js.ResourceRequirements.MemoryLimit = req.MemoryLimit.Value
+					JobType:              req.JobType.ValueString(),
+					ResourceRequirements: getResourceRequirementOptions(&req.ResourceRequirementsFields),
 				}
 				reqs = append(reqs, js)
 			}

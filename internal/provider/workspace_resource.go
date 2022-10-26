@@ -145,33 +145,39 @@ func (r *WorkspaceResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.D
 
 func getCommonWorkspaceFields(data WorkspaceModel) apiclient.CommonWorkspaceFields {
 	fields := apiclient.CommonWorkspaceFields{
-		Email: data.Email.Value,
+		Email: data.Email.ValueString(),
 	}
 
 	if v := data.AnonymousDataCollection; !v.IsUnknown() {
-		fields.AnonymousDataCollection = &v.Value
+		b := v.ValueBool()
+		fields.AnonymousDataCollection = &b
 	}
 	if v := data.News; !v.IsUnknown() {
-		fields.News = &v.Value
+		b := v.ValueBool()
+		fields.News = &b
 	}
 	if v := data.SecurityUpdates; !v.IsUnknown() {
-		fields.SecurityUpdates = &v.Value
+		b := v.ValueBool()
+		fields.SecurityUpdates = &b
 	}
 	if v := data.DisplaySetupWizard; !v.IsUnknown() {
-		fields.DisplaySetupWizard = &v.Value
+		b := v.ValueBool()
+		fields.DisplaySetupWizard = &b
 	}
 	for _, notif := range data.NotificationConfig {
 		n := apiclient.Notification{
-			NotificationType: notif.NotificationType.Value,
+			NotificationType: notif.NotificationType.ValueString(),
 			SlackConfiguration: apiclient.SlackConfiguration{
-				Webhook: notif.SlackWebhook.Value,
+				Webhook: notif.SlackWebhook.ValueString(),
 			},
 		}
 		if v := notif.SendOnSuccess; !v.IsUnknown() {
-			n.SendOnSuccess = &v.Value
+			b := v.ValueBool()
+			n.SendOnSuccess = &b
 		}
 		if v := notif.SendOnFailure; !v.IsUnknown() {
-			n.SendOnFailure = &v.Value
+			b := v.ValueBool()
+			n.SendOnFailure = &b
 		}
 		fields.Notifications = append(fields.Notifications, n)
 	}
@@ -238,7 +244,7 @@ func (r *WorkspaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	workspaceId := state.Id.Value
+	workspaceId := state.Id.ValueString()
 
 	workspace, err := r.client.GetWorkspaceById(workspaceId)
 	if err != nil {
@@ -290,7 +296,7 @@ func (r *WorkspaceResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	workspaceId := state.Id.Value
+	workspaceId := state.Id.ValueString()
 	err := r.client.DeleteWorkspace(workspaceId)
 	if err != nil {
 		resp.Diagnostics.AddError(

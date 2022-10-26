@@ -213,7 +213,7 @@ func (r *SourceDefinitionResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	sourceDefinitionId := plan.Id.Value
+	sourceDefinitionId := plan.Id.ValueString()
 
 	sourceDefinition, err := r.client.GetConnectorDefinitionById(sourceDefinitionId, apiclient.SourceType)
 	if err != nil {
@@ -241,9 +241,9 @@ func (r *SourceDefinitionResource) Update(ctx context.Context, req resource.Upda
 
 	updatedSourceDefinition := apiclient.UpdatedConnectorDefinition{
 		SourceDefinitionIdBody: apiclient.SourceDefinitionIdBody{
-			SourceDefinitionId: plan.Id.Value,
+			SourceDefinitionId: plan.Id.ValueString(),
 		},
-		DockerImageTag:       plan.DockerImageTag.Value,
+		DockerImageTag:       plan.DockerImageTag.ValueString(),
 		ResourceRequirements: getResourceRequirementFields(plan),
 	}
 
@@ -270,7 +270,7 @@ func (r *SourceDefinitionResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
-	sourceDefinitionId := state.Id.Value
+	sourceDefinitionId := state.Id.ValueString()
 	err := r.client.DeleteConnectorDefinition(sourceDefinitionId, apiclient.SourceType)
 	if err != nil {
 		resp.Diagnostics.AddError(

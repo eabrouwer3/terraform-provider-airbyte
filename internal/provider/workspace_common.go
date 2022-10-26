@@ -33,22 +33,22 @@ type workspaceNotificationConfigModel struct {
 func FlattenWorkspace(workspace *apiclient.Workspace) WorkspaceModel {
 	var data WorkspaceModel
 
-	data.Id = types.String{Value: workspace.WorkspaceId}
-	data.Slug = types.String{Value: workspace.Slug}
-	data.CustomerId = types.String{Value: workspace.CustomerId}
-	data.Name = types.String{Value: workspace.Name}
+	data.Id = types.StringValue(workspace.WorkspaceId)
+	data.Slug = types.StringValue(workspace.Slug)
+	data.CustomerId = types.StringValue(workspace.CustomerId)
+	data.Name = types.StringValue(workspace.Name)
 	if len(workspace.Notifications) > 0 {
 		data.NotificationConfig = []workspaceNotificationConfigModel{}
 		for _, notifConfig := range workspace.Notifications {
 			data.NotificationConfig = append(data.NotificationConfig, workspaceNotificationConfigModel{
-				NotificationType: types.String{Value: notifConfig.NotificationType},
+				NotificationType: types.StringValue(notifConfig.NotificationType),
 				SendOnSuccess:    types.Bool{Value: *notifConfig.SendOnSuccess},
 				SendOnFailure:    types.Bool{Value: *notifConfig.SendOnFailure},
-				SlackWebhook:     types.String{Value: notifConfig.SlackConfiguration.Webhook},
+				SlackWebhook:     types.StringValue(notifConfig.SlackConfiguration.Webhook),
 			})
 		}
 	}
-	data.Email = types.String{Value: workspace.Email}
+	data.Email = types.StringValue(workspace.Email)
 	data.InitialSetupComplete = types.Bool{Value: *workspace.InitialSetupComplete}
 	data.DisplaySetupWizard = types.Bool{Value: *workspace.DisplaySetupWizard}
 	data.AnonymousDataCollection = types.Bool{Value: *workspace.AnonymousDataCollection}
@@ -64,7 +64,7 @@ func FlattenWorkspace(workspace *apiclient.Workspace) WorkspaceModel {
 	} else {
 		data.FeedbackDone = types.Bool{Null: true}
 	}
-	data.DefaultGeography = types.String{Value: workspace.DefaultGeography}
+	data.DefaultGeography = types.StringValue(workspace.DefaultGeography)
 
 	return data
 }
