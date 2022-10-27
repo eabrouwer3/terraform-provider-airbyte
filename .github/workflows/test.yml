@@ -60,6 +60,14 @@ jobs:
           - '1.2.*'
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          repository: airbytehq/airbyte
+          path: airbyte
+      - run: |
+          cd airbyte
+          docker compose up -d
+          curl --head -X POST --retry 12 --retry-connrefused --retry-delay 5 http://localhost:8000/api/v1/health
       - uses: actions/setup-go@v3
         with:
           go-version-file: 'go.mod'
@@ -73,3 +81,5 @@ jobs:
           TF_ACC: "1"
         run: go test -v -cover ./internal/provider/
         timeout-minutes: 10
+      - run: |
+          docker compose down
