@@ -47,37 +47,6 @@ type CommonConnectionFields struct {
 	BreakingChange       *bool                        `json:"breakingChange,omitempty"`
 }
 
-type SyncCatalog struct {
-	Streams []Stream `json:"streams"`
-}
-
-type Stream struct {
-	Stream SourceStreamSchema      `json:"stream"`
-	Config DestinationStreamConfig `json:"config"`
-}
-
-type SourceStreamSchema struct {
-	// Will be a copy of what's returned from the spec data source
-	Name                    string          `json:"name"`
-	JsonSchema              json.RawMessage `json:"jsonSchema,omitempty"`
-	SupportedSyncModes      []string        `json:"supportedSyncModes,omitempty"`
-	SourceDefinedCursor     *bool           `json:"sourceDefinedCursor,omitempty"`
-	DefaultCursorField      []string        `json:"defaultCursorField,omitempty"`
-	SourceDefinedPrimaryKey [][]string      `json:"sourceDefinedPrimaryKey,omitempty"`
-	Namespace               string          `json:"namespace,omitempty"`
-}
-
-type DestinationStreamConfig struct {
-	// Required Fields
-	SyncMode            string `json:"syncMode"`
-	DestinationSyncMode string `json:"destinationSyncMode"`
-	// Optional Fields
-	CursorField []string   `json:"cursorField,omitempty"`
-	PrimaryKey  [][]string `json:"primaryKey,omitempty"`
-	AliasName   string     `json:"aliasName,omitempty"`
-	Selected    *bool      `json:"selected,omitempty"`
-}
-
 type ScheduleSpec struct {
 	// Both are required
 	Units    int64  `json:"units"`

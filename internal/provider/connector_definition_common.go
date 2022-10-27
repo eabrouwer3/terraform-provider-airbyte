@@ -20,18 +20,20 @@ type ConnectorDefinitionModel struct {
 	JobSpecificResourceRequirements *[]JobSpecResourceRequirementsModel `tfsdk:"job_specific_resource_requirements"`
 }
 
-type ResourceRequirementsFields struct {
+type ResourceRequirementsModel struct {
 	CPURequest    types.String `tfsdk:"cpu_request"`
 	CPULimit      types.String `tfsdk:"cpu_limit"`
 	MemoryRequest types.String `tfsdk:"memory_request"`
 	MemoryLimit   types.String `tfsdk:"memory_limit"`
 }
 
-type ResourceRequirementsModel = ResourceRequirementsFields
-
 type JobSpecResourceRequirementsModel struct {
 	JobType types.String `tfsdk:"job_type"`
-	ResourceRequirementsFields
+	// See this issue for why we can't just compose ResourceRequirementsModel into here - https://github.com/hashicorp/terraform-plugin-framework/issues/309
+	CPURequest    types.String `tfsdk:"cpu_request"`
+	CPULimit      types.String `tfsdk:"cpu_limit"`
+	MemoryRequest types.String `tfsdk:"memory_request"`
+	MemoryLimit   types.String `tfsdk:"memory_limit"`
 }
 
 func FlattenConnectorDefinition(connectorDefinition *apiclient.ConnectorDefinition) (*ConnectorDefinitionModel, error) {
@@ -53,17 +55,20 @@ func FlattenConnectorDefinition(connectorDefinition *apiclient.ConnectorDefiniti
 
 	if connectorDefinition.ResourceRequirements != nil {
 		if reqs := connectorDefinition.ResourceRequirements.Default; reqs != nil {
-			req := ResourceRequirementsModel{}
-
-			data.DefaultResourceRequirements = &req
+			req := FlattenResourceRequirements(reqs)
+			data.DefaultResourceRequirements = req
 		}
 
 		if reqs := *connectorDefinition.ResourceRequirements.JobSpecific; len(reqs) > 0 {
 			var reqData []JobSpecResourceRequirementsModel
 			for _, req := range reqs {
+				reqOptions := FlattenResourceRequirements(req.ResourceRequirements)
 				jobReq := JobSpecResourceRequirementsModel{
-					JobType:                    types.StringValue(req.JobType),
-					ResourceRequirementsFields: *FlattenResourceRequirements(req.ResourceRequirements),
+					JobType:       types.StringValue(req.JobType),
+					CPULimit:      reqOptions.CPULimit,
+					CPURequest:    reqOptions.CPURequest,
+					MemoryLimit:   reqOptions.MemoryLimit,
+					MemoryRequest: reqOptions.MemoryRequest,
 				}
 				reqData = append(reqData, jobReq)
 			}
@@ -74,8 +79,8 @@ func FlattenConnectorDefinition(connectorDefinition *apiclient.ConnectorDefiniti
 	return &data, nil
 }
 
-func FlattenResourceRequirements(options *apiclient.ResourceRequirementsOptions) *ResourceRequirementsFields {
-	req := ResourceRequirementsFields{}
+func FlattenResourceRequirements(options *apiclient.ResourceRequirementsOptions) *ResourceRequirementsModel {
+	req := ResourceRequirementsModel{}
 
 	if options.CPURequest != "" {
 		req.CPURequest = types.StringValue(options.CPURequest)
@@ -111,7 +116,7 @@ func GetCommonConnectorDefinitionFields(data ConnectorDefinitionModel) apiclient
 	}
 }
 
-func getResourceRequirementOptions(model *ResourceRequirementsFields) *apiclient.ResourceRequirementsOptions {
+func getResourceRequirementOptions(model *ResourceRequirementsModel) *apiclient.ResourceRequirementsOptions {
 	if model != nil {
 		reqs := apiclient.ResourceRequirementsOptions{}
 		if v := model.CPURequest; !v.IsUnknown() {
@@ -141,8 +146,13 @@ func getResourceRequirementFields(data ConnectorDefinitionModel) *apiclient.Reso
 			var reqs []apiclient.JobSpecificResourceRequirements
 			for _, req := range *data.JobSpecificResourceRequirements {
 				js := apiclient.JobSpecificResourceRequirements{
-					JobType:              req.JobType.ValueString(),
-					ResourceRequirements: getResourceRequirementOptions(&req.ResourceRequirementsFields),
+					JobType: req.JobType.ValueString(),
+					ResourceRequirements: getResourceRequirementOptions(&ResourceRequirementsModel{
+						CPURequest:    req.CPURequest,
+						CPULimit:      req.CPULimit,
+						MemoryRequest: req.MemoryRequest,
+						MemoryLimit:   req.MemoryLimit,
+					}),
 				}
 				reqs = append(reqs, js)
 			}
