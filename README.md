@@ -1,6 +1,6 @@
 # Terraform Provider Airbyte (Terraform Plugin Framework)
 
-Terraform Provider for [Airbyte]()
+Terraform Provider for [Airbyte](https://airbyte.io/).
 
 ## Requirements
 
