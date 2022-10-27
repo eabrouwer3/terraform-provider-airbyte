@@ -128,7 +128,7 @@ func (r *ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 								Type:        types.ListType{ElemType: types.StringType},
 								Optional:    true,
 								Validators: []tfsdk.AttributeValidator{
-									listvalidator.ValuesAre(stringvalidator.OneOf("source", "destination", "customformat")),
+									listvalidator.ValuesAre(stringvalidator.OneOf("full_refresh", "incremental")),
 								},
 							},
 							"source_defined_cursor": {
@@ -137,6 +137,7 @@ func (r *ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 									"or the default one is used as a backup.",
 								Type:     types.BoolType,
 								Optional: true,
+								Computed: true,
 							},
 							"default_cursor_field": {
 								Description: "Path to the field that will be used to determine if a record is new or " +
@@ -171,7 +172,7 @@ func (r *ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 								Required:    true,
 								Validators: []tfsdk.AttributeValidator{
 									stringvalidator.OneOf("full_refresh", "incremental"),
-									utils.ValueBasedAlsoRequires("incremental", path.MatchRelative().AtName("cursor_field")),
+									utils.ValueBasedAlsoRequires("incremental", path.MatchRelative().AtParent().AtName("cursor_field")),
 								},
 							},
 							"cursor_field": {
@@ -187,7 +188,7 @@ func (r *ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 								Required:    true,
 								Validators: []tfsdk.AttributeValidator{
 									stringvalidator.OneOf("append", "overwrite", "append_dedup"),
-									utils.ValueBasedAlsoRequires("append_dedup", path.MatchRelative().AtName("primary_key")),
+									utils.ValueBasedAlsoRequires("append_dedup", path.MatchRelative().AtParent().AtName("primary_key")),
 								},
 							},
 							"primary_key": {
@@ -220,8 +221,8 @@ func (r *ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 				Computed:    true,
 				Validators: []tfsdk.AttributeValidator{
 					stringvalidator.OneOf("manual", "basic", "cron"),
-					utils.ValueBasedAlsoRequires("basic", path.MatchRelative().AtName("basic_schedule")),
-					utils.ValueBasedAlsoRequires("cron", path.MatchRelative().AtName("cron_schedule")),
+					utils.ValueBasedAlsoRequires("basic", path.MatchRelative().AtParent().AtName("basic_schedule")),
+					utils.ValueBasedAlsoRequires("cron", path.MatchRelative().AtParent().AtName("cron_schedule")),
 				},
 			},
 			"basic_schedule": {
@@ -295,6 +296,11 @@ func (r *ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 			"geography": {
 				Description: "Allowed Values: 'auto' | 'us' | 'eu'",
 				Type:        types.StringType,
+				Computed:    true,
+			},
+			"breaking_change": {
+				Description: "Does this change constitute a breaking change",
+				Type:        types.BoolType,
 				Computed:    true,
 			},
 		},
@@ -391,8 +397,12 @@ func getCommonConnectionFields(data ConnectionModel) apiclient.CommonConnectionF
 				b := v.ValueBool()
 				stream.Config.Selected = &b
 			}
+
+			streams = append(streams, stream)
 		}
-		fields.SyncCatalog.Streams = streams
+		fields.SyncCatalog = &apiclient.SyncCatalog{
+			Streams: streams,
+		}
 	}
 	if v := data.ScheduleType; !v.IsUnknown() {
 		fields.ScheduleType = v.ValueString()
