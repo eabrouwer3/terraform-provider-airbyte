@@ -228,6 +228,9 @@ func (r *ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 			"basic_schedule": {
 				Description: "Basic time schedule - \"Run sync every ...\"",
 				Optional:    true,
+				Validators: []tfsdk.AttributeValidator{
+					schemavalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("cron_schedule")),
+				},
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
 					"time_unit": {
 						Description: "Allowed: minutes | hours | days | weeks | months",
@@ -247,6 +250,9 @@ func (r *ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 			"cron_schedule": {
 				Description: "Flexible Cron Schedule",
 				Optional:    true,
+				Validators: []tfsdk.AttributeValidator{
+					schemavalidator.ConflictsWith(path.MatchRelative().AtParent().AtName("basic_schedule")),
+				},
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
 					"cron_expression": {
 						MarkdownDescription: "[Cron Expression](http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html). " +

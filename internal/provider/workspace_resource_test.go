@@ -61,42 +61,6 @@ func TestAccResourceWorkspace_complex(t *testing.T) {
 	})
 }
 
-//func TestAccExampleResource(t *testing.T) {
-//	resource.Test(t, resource.TestCase{
-//		PreCheck:                 func() { testAccPreCheck(t) },
-//		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-//		Steps: []resource.TestStep{
-//			// Create and Read testing
-//			{
-//				Config: testAccExampleResourceConfig("one"),
-//				Check: resource.ComposeAggregateTestCheckFunc(
-//					resource.TestCheckResourceAttr("scaffolding_example.test", "configurable_attribute", "one"),
-//					resource.TestCheckResourceAttr("scaffolding_example.test", "id", "example-id"),
-//				),
-//			},
-//			// ImportState testing
-//			{
-//				ResourceName:      "scaffolding_example.test",
-//				ImportState:       true,
-//				ImportStateVerify: true,
-//				// This is not normally necessary, but is here because this
-//				// example code does not have an actual upstream service.
-//				// Once the Read method is able to refresh information from
-//				// the upstream service, this can be removed.
-//				ImportStateVerifyIgnore: []string{"configurable_attribute"},
-//			},
-//			// Update and Read testing
-//			{
-//				Config: testAccExampleResourceConfig("two"),
-//				Check: resource.ComposeAggregateTestCheckFunc(
-//					resource.TestCheckResourceAttr("scaffolding_example.test", "configurable_attribute", "two"),
-//				),
-//			},
-//			// Delete testing automatically occurs in TestCase
-//		},
-//	})
-//}
-
 // Don't know how to do this yet with the new framework...
 //func testAccResourceWorkspaceDestroy(s *terraform.State) error {
 //	client := testAccProvider.Meta().(*apiclient.ApiClient)
@@ -143,18 +107,18 @@ resource "airbyte_workspace" "complex" {
 }
 `
 
-const testAccResourceWorkspace_complexChange = `
-resource "airbyte_workspace" "complex" {
-  name = "complex_test"
-  email = "test@example.com"
-  display_setup_wizard = true
-  anonymous_data_collection = false
-  news = true
-  security_updates = true
-  notification_config = [{
-    notification_type = "slack"
-    send_on_success = true
-    slack_webhook = "http://example.com/webhook"
-  }]
-}
-`
+//const testAccResourceWorkspace_complexChange = `
+//resource "airbyte_workspace" "complex" {
+//  name = "complex_test"
+//  email = "test@example.com"
+//  display_setup_wizard = true
+//  anonymous_data_collection = false
+//  news = true
+//  security_updates = true
+//  notification_config = [{
+//    notification_type = "slack"
+//    send_on_success = true
+//    slack_webhook = "http://example.com/webhook"
+//  }]
+//}
+//`

@@ -64,6 +64,7 @@ func (r *DestinationResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag
 				Description: "Connection Configuration",
 				Type:        types.StringType,
 				Required:    true,
+				Sensitive:   true,
 			},
 			"definition_name": {
 				Description: "Destination Definition Name",

@@ -64,6 +64,7 @@ func (r *SourceResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diag
 				Description: "Connection Configuration",
 				Type:        types.StringType,
 				Required:    true,
+				Sensitive:   true,
 			},
 			"definition_name": {
 				Description: "Source Definition Name",
