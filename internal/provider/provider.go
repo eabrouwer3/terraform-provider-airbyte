@@ -125,11 +125,11 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 	}
 
 	if username == "" {
-		resp.Diagnostics.AddAttributeError(
+		resp.Diagnostics.AddAttributeWarning(
 			path.Root("host_url"),
 			"Missing Airbyte API Username",
-			"The provider cannot create the Airbyte API client as there is a missing or empty value for the Airbyte API Username. "+
-				"Set the host value in the configuration or use the AIRBYTE_USERNAME environment variable. "+
+			"There is a missing or empty value for the Airbyte API Username. This assumes authentication has been disabled for this Airbyte Instance."+
+				"If this is not true, set the username value in the configuration or use the AIRBYTE_USERNAME environment variable. "+
 				"If either is already set, ensure the value is not empty.",
 		)
 	}
@@ -139,7 +139,7 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 
 	if data.Password.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
-			path.Root("host_url"),
+			path.Root("username"),
 			"Unknown Airbyte API Password",
 			"The provider cannot create the Airbyte API client as there is an unknown configuration value for the Airbyte API Password. "+
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the AIRBYTE_PASSWORD environment variable.",
@@ -157,12 +157,12 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 		password = data.Password.ValueString()
 	}
 
-	if username == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("host_url"),
-			"Missing Airbyte API Password",
-			"The provider cannot create the Airbyte API client as there is a missing or empty value for the Airbyte API Password. "+
-				"Set the host value in the configuration or use the AIRBYTE_PASSWORD environment variable. "+
+	if password == "" {
+		resp.Diagnostics.AddAttributeWarning(
+			path.Root("password"),
+			"Blank Airbyte API Password",
+			"There is a missing or empty value for the Airbyte API Password. This assumes authentication has been disabled for this Airbyte Instance."+
+				"If this is not true, set the password value in the configuration or use the AIRBYTE_PASSWORD environment variable. "+
 				"If either is already set, ensure the value is not empty.",
 		)
 	}

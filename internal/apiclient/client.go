@@ -76,7 +76,9 @@ func basicAuth(username, password string) string {
 
 func (c *ApiClient) doRequest(req *http.Request) ([]byte, error) {
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Basic %s", basicAuth(c.Username, c.Password)))
+	if c.Username != "" && c.Password != "" {
+		req.Header.Set("Authorization", fmt.Sprintf("Basic %s", basicAuth(c.Username, c.Password)))
+	}
 
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
