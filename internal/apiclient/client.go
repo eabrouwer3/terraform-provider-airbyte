@@ -1,6 +1,7 @@
 package apiclient
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,6 +12,8 @@ const BaseUrl = "api/v1"
 
 type ApiClient struct {
 	HostURL    string // http://localhost:8000
+	Username   string
+	Password   string
 	HTTPClient *http.Client
 }
 
@@ -66,8 +69,14 @@ func (c *ApiClient) check() error {
 	return nil
 }
 
+func basicAuth(username, password string) string {
+	auth := username + ":" + password
+	return base64.StdEncoding.EncodeToString([]byte(auth))
+}
+
 func (c *ApiClient) doRequest(req *http.Request) ([]byte, error) {
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Basic %s", basicAuth(c.Username, c.Password)))
 
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {

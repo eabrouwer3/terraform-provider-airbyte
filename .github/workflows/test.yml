@@ -68,7 +68,7 @@ jobs:
           cd airbyte
           docker compose up -d
           sleep 10
-          curl --retry 24 --retry-delay 5 --retry-max-time 120 --retry-connrefused http://localhost:8000/api/v1/health
+          curl --retry 24 --retry-delay 5 --retry-max-time 120 --retry-connrefused http://localhost:8000/api/v1/health -u airbyte:password
       - uses: actions/setup-go@v3
         with:
           go-version-file: 'go.mod'
@@ -83,4 +83,5 @@ jobs:
         run: go test -v -cover ./internal/provider/
         timeout-minutes: 10
       - run: |
+          cd airbyte
           docker compose down

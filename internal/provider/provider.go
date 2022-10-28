@@ -30,7 +30,9 @@ type AirbyteProvider struct {
 
 // AirbyteProviderModel describes the provider data model.
 type AirbyteProviderModel struct {
-	HostUrl types.String `tfsdk:"host_url"`
+	HostUrl  types.String `tfsdk:"host_url"`
+	Username types.String `tfsdk:"username"`
+	Password types.String `tfsdk:"password"`
 }
 
 func (p *AirbyteProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -42,9 +44,20 @@ func (p *AirbyteProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			"host_url": {
-				MarkdownDescription: "Airbyte API URL",
-				Optional:            true,
-				Type:                types.StringType,
+				Description: "Airbyte API URL",
+				Optional:    true,
+				Type:        types.StringType,
+			},
+			"username": {
+				Description: "Airbyte API Username",
+				Optional:    true,
+				Type:        types.StringType,
+			},
+			"password": {
+				Description: "Airbyte API Password",
+				Optional:    true,
+				Type:        types.StringType,
+				Sensitive:   true,
 			},
 		},
 	}, nil
@@ -54,7 +67,6 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 	var data AirbyteProviderModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -67,7 +79,6 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the AIRBYTE_URL environment variable.",
 		)
 	}
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -76,7 +87,6 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 	if !ok {
 		hostUrl = "http://localhost:8000"
 	}
-
 	if !data.HostUrl.IsNull() {
 		hostUrl = data.HostUrl.ValueString()
 	}
@@ -90,13 +100,80 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 				"If either is already set, ensure the value is not empty.",
 		)
 	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
+	if data.Username.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("host_url"),
+			"Unknown Airbyte API Username",
+			"The provider cannot create the Airbyte API client as there is an unknown configuration value for the Airbyte API Username. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the AIRBYTE_USERNAME environment variable.",
+		)
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	username, ok := os.LookupEnv("AIRBYTE_USERNAME")
+	if !ok {
+		username = "airbyte"
+	}
+	if !data.Username.IsNull() {
+		username = data.Username.ValueString()
+	}
+
+	if username == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("host_url"),
+			"Missing Airbyte API Username",
+			"The provider cannot create the Airbyte API client as there is a missing or empty value for the Airbyte API Username. "+
+				"Set the host value in the configuration or use the AIRBYTE_USERNAME environment variable. "+
+				"If either is already set, ensure the value is not empty.",
+		)
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if data.Password.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("host_url"),
+			"Unknown Airbyte API Password",
+			"The provider cannot create the Airbyte API client as there is an unknown configuration value for the Airbyte API Password. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the AIRBYTE_PASSWORD environment variable.",
+		)
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	password, ok := os.LookupEnv("AIRBYTE_PASSWORD")
+	if !ok {
+		password = "password"
+	}
+	if !data.Password.IsNull() {
+		password = data.Password.ValueString()
+	}
+
+	if username == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("host_url"),
+			"Missing Airbyte API Password",
+			"The provider cannot create the Airbyte API client as there is a missing or empty value for the Airbyte API Password. "+
+				"Set the host value in the configuration or use the AIRBYTE_PASSWORD environment variable. "+
+				"If either is already set, ensure the value is not empty.",
+		)
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	client := apiclient.ApiClient{
 		HostURL:    hostUrl,
+		Username:   username,
+		Password:   password,
 		HTTPClient: &http.Client{Timeout: 120 * time.Second},
 	}
 	resp.DataSourceData = client
