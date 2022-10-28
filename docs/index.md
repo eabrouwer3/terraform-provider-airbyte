@@ -24,3 +24,5 @@ provider "airbyte" {
 ### Optional
 
 - `host_url` (String) Airbyte API URL
+- `password` (String, Sensitive) Airbyte API Password
+- `username` (String) Airbyte API Username
