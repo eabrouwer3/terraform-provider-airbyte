@@ -42,27 +42,27 @@ func FlattenWorkspace(workspace *apiclient.Workspace) WorkspaceModel {
 		for _, notifConfig := range workspace.Notifications {
 			data.NotificationConfig = append(data.NotificationConfig, workspaceNotificationConfigModel{
 				NotificationType: types.StringValue(notifConfig.NotificationType),
-				SendOnSuccess:    types.Bool{Value: *notifConfig.SendOnSuccess},
-				SendOnFailure:    types.Bool{Value: *notifConfig.SendOnFailure},
+				SendOnSuccess:    types.BoolValue(*notifConfig.SendOnSuccess),
+				SendOnFailure:    types.BoolValue(*notifConfig.SendOnFailure),
 				SlackWebhook:     types.StringValue(notifConfig.SlackConfiguration.Webhook),
 			})
 		}
 	}
 	data.Email = types.StringValue(workspace.Email)
-	data.InitialSetupComplete = types.Bool{Value: *workspace.InitialSetupComplete}
-	data.DisplaySetupWizard = types.Bool{Value: *workspace.DisplaySetupWizard}
-	data.AnonymousDataCollection = types.Bool{Value: *workspace.AnonymousDataCollection}
-	data.News = types.Bool{Value: *workspace.News}
-	data.SecurityUpdates = types.Bool{Value: *workspace.SecurityUpdates}
+	data.InitialSetupComplete = types.BoolValue(*workspace.InitialSetupComplete)
+	data.DisplaySetupWizard = types.BoolValue(*workspace.DisplaySetupWizard)
+	data.AnonymousDataCollection = types.BoolValue(*workspace.AnonymousDataCollection)
+	data.News = types.BoolValue(*workspace.News)
+	data.SecurityUpdates = types.BoolValue(*workspace.SecurityUpdates)
 	if v := workspace.FirstCompletedSync; v != nil {
-		data.FirstCompletedSync = types.Bool{Value: *v}
+		data.FirstCompletedSync = types.BoolValue(*v)
 	} else {
-		data.FirstCompletedSync = types.Bool{Null: true}
+		data.FirstCompletedSync = types.BoolNull()
 	}
 	if v := workspace.FeedbackDone; v != nil {
-		data.FeedbackDone = types.Bool{Value: *v}
+		data.FeedbackDone = types.BoolValue(*v)
 	} else {
-		data.FeedbackDone = types.Bool{Null: true}
+		data.FeedbackDone = types.BoolNull()
 	}
 	data.DefaultGeography = types.StringValue(workspace.DefaultGeography)
 

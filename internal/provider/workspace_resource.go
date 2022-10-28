@@ -216,7 +216,7 @@ func (r *WorkspaceResource) Create(ctx context.Context, req resource.CreateReque
 
 	newWorkspace := apiclient.NewWorkspace{
 		WorkspaceNameBody: apiclient.WorkspaceNameBody{
-			Name: plan.Name.Value,
+			Name: plan.Name.ValueString(),
 		},
 		CommonWorkspaceFields: getCommonWorkspaceFields(plan),
 	}
@@ -268,7 +268,7 @@ func (r *WorkspaceResource) Update(ctx context.Context, req resource.UpdateReque
 
 	updatedWorkspace := apiclient.UpdatedWorkspace{
 		WorkspaceIdBody: apiclient.WorkspaceIdBody{
-			WorkspaceId: plan.Id.Value,
+			WorkspaceId: plan.Id.ValueString(),
 		},
 		CommonWorkspaceFields: getCommonWorkspaceFields(plan),
 	}

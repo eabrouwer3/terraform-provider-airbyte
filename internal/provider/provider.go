@@ -188,6 +188,7 @@ func (p *AirbyteProvider) Resources(ctx context.Context) []func() resource.Resou
 		NewDestinationDefinitionResource,
 		NewDestinationResource,
 		NewConnectionResource,
+		NewOperationResource,
 	}
 }
 

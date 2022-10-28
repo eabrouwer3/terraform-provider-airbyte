@@ -42,7 +42,7 @@ func (m StringDefaultModifier) Modify(ctx context.Context, req tfsdk.ModifyAttri
 		return
 	}
 
-	if !str.Null {
+	if !str.IsNull() {
 		return
 	}
 

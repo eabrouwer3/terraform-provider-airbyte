@@ -44,7 +44,7 @@ func (av valueBasedAlsoRequiresAttributeValidator) Validate(ctx context.Context,
 	}
 
 	// If attribute configuration equals the value, there is nothing else to validate
-	if req.AttributeConfig.(types.String).Value != av.value {
+	if req.AttributeConfig.(types.String).ValueString() != av.value {
 		return
 	}
 
