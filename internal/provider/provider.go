@@ -30,9 +30,10 @@ type AirbyteProvider struct {
 
 // AirbyteProviderModel describes the provider data model.
 type AirbyteProviderModel struct {
-	HostUrl  types.String `tfsdk:"host_url"`
-	Username types.String `tfsdk:"username"`
-	Password types.String `tfsdk:"password"`
+	HostUrl           types.String `tfsdk:"host_url"`
+	Username          types.String `tfsdk:"username"`
+	Password          types.String `tfsdk:"password"`
+	AdditionalHeaders types.Map    `tfsdk:"additional_headers"`
 }
 
 func (p *AirbyteProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -59,6 +60,11 @@ func (p *AirbyteProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 				Type:        types.StringType,
 				Sensitive:   true,
 			},
+			"additional_headers": {
+				Description: "Additional Headers to pass in requests to Airbyte's API",
+				Optional:    true,
+				Type:        types.MapType{ElemType: types.StringType},
+			},
 		},
 	}, nil
 }
@@ -67,18 +73,6 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 	var data AirbyteProviderModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	if data.HostUrl.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("host_url"),
-			"Unknown Airbyte API URL",
-			"The provider cannot create the Airbyte API client as there is an unknown configuration value for the Airbyte API URL. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the AIRBYTE_URL environment variable.",
-		)
-	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -98,18 +92,6 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 			"The provider cannot create the Airbyte API client as there is a missing or empty value for the Airbyte API URL. "+
 				"Set the host value in the configuration or use the AIRBYTE_URL environment variable. "+
 				"If either is already set, ensure the value is not empty.",
-		)
-	}
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	if data.Username.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("host_url"),
-			"Unknown Airbyte API Username",
-			"The provider cannot create the Airbyte API client as there is an unknown configuration value for the Airbyte API Username. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the AIRBYTE_USERNAME environment variable.",
 		)
 	}
 	if resp.Diagnostics.HasError() {
@@ -137,18 +119,6 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 		return
 	}
 
-	if data.Password.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("username"),
-			"Unknown Airbyte API Password",
-			"The provider cannot create the Airbyte API client as there is an unknown configuration value for the Airbyte API Password. "+
-				"Either target apply the source of the value first, set the value statically in the configuration, or use the AIRBYTE_PASSWORD environment variable.",
-		)
-	}
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	password, ok := os.LookupEnv("AIRBYTE_PASSWORD")
 	if !ok {
 		password = "password"
@@ -170,11 +140,18 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 		return
 	}
 
+	additionalHeaders := data.AdditionalHeaders.Elements()
+	additionalHeadersVals := make(map[string]string)
+	for k, v := range additionalHeaders {
+		additionalHeadersVals[k] = v.(types.String).ValueString()
+	}
+
 	client := apiclient.ApiClient{
-		HostURL:    hostUrl,
-		Username:   username,
-		Password:   password,
-		HTTPClient: &http.Client{Timeout: 120 * time.Second},
+		HostURL:           hostUrl,
+		Username:          username,
+		Password:          password,
+		AdditionalHeaders: additionalHeadersVals,
+		HTTPClient:        &http.Client{Timeout: 120 * time.Second},
 	}
 	resp.DataSourceData = client
 	resp.ResourceData = client

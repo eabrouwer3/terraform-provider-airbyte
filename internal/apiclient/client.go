@@ -11,10 +11,11 @@ import (
 const BaseUrl = "api/v1"
 
 type ApiClient struct {
-	HostURL    string // http://localhost:8000
-	Username   string
-	Password   string
-	HTTPClient *http.Client
+	HostURL           string // http://localhost:8000
+	Username          string
+	Password          string
+	HTTPClient        *http.Client
+	AdditionalHeaders map[string]string
 }
 
 type HealthCheckResponse struct {
@@ -78,6 +79,9 @@ func (c *ApiClient) doRequest(req *http.Request) ([]byte, error) {
 	req.Header.Set("Content-Type", "application/json")
 	if c.Username != "" && c.Password != "" {
 		req.Header.Set("Authorization", fmt.Sprintf("Basic %s", basicAuth(c.Username, c.Password)))
+	}
+	for k, v := range c.AdditionalHeaders {
+		req.Header.Set(k, v)
 	}
 
 	res, err := c.HTTPClient.Do(req)

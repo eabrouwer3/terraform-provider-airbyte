@@ -17,6 +17,9 @@ provider "airbyte" {
   host_url = "http://localhost:8000"
   username = "airbyte"
   password = "password"
+  additional_headers = {
+    Host = "airbyte.internal.io"
+  }
 }
 ```
 
@@ -25,6 +28,7 @@ provider "airbyte" {
 
 ### Optional
 
+- `additional_headers` (Map of String) Additional Headers to pass in requests to Airbyte's API
 - `host_url` (String) Airbyte API URL
 - `password` (String, Sensitive) Airbyte API Password
 - `username` (String) Airbyte API Username
