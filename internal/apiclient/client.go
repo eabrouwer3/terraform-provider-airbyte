@@ -19,7 +19,7 @@ type ApiClient struct {
 }
 
 type HealthCheckResponse struct {
-	available bool
+	Available bool `json:"available"`
 }
 
 type CommonErrorResponseFields struct {
@@ -67,8 +67,8 @@ func (c *ApiClient) Check() error {
 		return err
 	}
 
-	if !hcr.available {
-		return fmt.Errorf("url: %s, available: %t, body: %s", req.URL, hcr.available, body)
+	if !hcr.Available {
+		return fmt.Errorf("url: %s, available: %t, body: %s", req.URL, hcr.Available, body)
 	}
 
 	return nil
