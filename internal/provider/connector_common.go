@@ -39,12 +39,6 @@ func FlattenConnector(connector *apiclient.Connector) (*ConnectorModel, error) {
 	data.Name = types.StringValue(connector.Name)
 	data.Icon = types.StringValue(connector.Icon)
 
-	config, err := connector.ConnectionConfiguration.MarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	data.ConnectionConfiguration = types.StringValue(string(config))
-
 	return &data, nil
 }
 
