@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
 const BaseUrl = "api/v1"
@@ -85,7 +86,11 @@ func (c *ApiClient) doRequest(req *http.Request) ([]byte, error) {
 		req.Header.Set("Authorization", fmt.Sprintf("Basic %s", basicAuth(c.Username, c.Password)))
 	}
 	for k, v := range c.AdditionalHeaders {
-		req.Header.Set(k, v)
+		if strings.ToLower(k) == "host" {
+			req.Host = v
+		} else {
+			req.Header.Set(k, v)
+		}
 	}
 
 	res, err := c.HTTPClient.Do(req)
@@ -120,10 +125,8 @@ func (c *ApiClient) doRequest(req *http.Request) ([]byte, error) {
 			}
 		}
 		return nil, fmt.Errorf(
-			"url: %s, req headers: %s, resp headers: %s, status: %d, body: %s",
+			"url: %s, status: %d, body: %s",
 			req.URL,
-			req.Header,
-			res.Header,
 			res.StatusCode,
 			body,
 		)
