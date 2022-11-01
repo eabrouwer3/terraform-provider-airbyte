@@ -50,7 +50,7 @@ type Response500 struct {
 	CommonErrorResponseFields
 }
 
-func (c *ApiClient) check() error {
+func (c *ApiClient) Check() error {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/%s/health", c.HostURL, BaseUrl), nil)
 	if err != nil {
 		return err
@@ -65,6 +65,10 @@ func (c *ApiClient) check() error {
 	err = json.Unmarshal(body, &hcr)
 	if err != nil {
 		return err
+	}
+
+	if !hcr.available {
+		return fmt.Errorf("url: %s, available: %t, body: %s", req.URL, hcr.available, body)
 	}
 
 	return nil
@@ -115,7 +119,7 @@ func (c *ApiClient) doRequest(req *http.Request) ([]byte, error) {
 				body, _ = json.Marshal(r)
 			}
 		}
-		return nil, fmt.Errorf("status: %d, body: %s", res.StatusCode, body)
+		return nil, fmt.Errorf("url: %s, status: %d, body: %s", req.URL, res.StatusCode, body)
 	}
 
 	return body, err

@@ -153,6 +153,15 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 		AdditionalHeaders: additionalHeadersVals,
 		HTTPClient:        &http.Client{Timeout: 120 * time.Second},
 	}
+
+	err := client.Check()
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Checking API Status Failed",
+			err.Error(),
+		)
+	}
+
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
