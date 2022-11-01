@@ -136,6 +136,7 @@ func (r *SourceResource) Create(ctx context.Context, req resource.CreateRequest,
 		)
 		return
 	}
+	state.ConnectionConfiguration = plan.ConnectionConfiguration
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
@@ -165,6 +166,7 @@ func (r *SourceResource) Read(ctx context.Context, req resource.ReadRequest, res
 		)
 		return
 	}
+	state.ConnectionConfiguration = plan.ConnectionConfiguration
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
@@ -200,6 +202,7 @@ func (r *SourceResource) Update(ctx context.Context, req resource.UpdateRequest,
 		)
 		return
 	}
+	state.ConnectionConfiguration = plan.ConnectionConfiguration
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
