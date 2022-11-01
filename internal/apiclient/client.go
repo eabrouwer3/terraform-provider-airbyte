@@ -119,7 +119,14 @@ func (c *ApiClient) doRequest(req *http.Request) ([]byte, error) {
 				body, _ = json.Marshal(r)
 			}
 		}
-		return nil, fmt.Errorf("url: %s, status: %d, body: %s", req.URL, res.StatusCode, body)
+		return nil, fmt.Errorf(
+			"url: %s, req headers: %s, resp headers: %s, status: %d, body: %s",
+			req.URL,
+			req.Header,
+			res.Header,
+			res.StatusCode,
+			body,
+		)
 	}
 
 	return body, err
