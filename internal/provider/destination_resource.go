@@ -38,6 +38,9 @@ func (r *DestinationResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag
 				Description: "Destination ID",
 				Type:        types.StringType,
 				Computed:    true,
+				PlanModifiers: []tfsdk.AttributePlanModifier{
+					resource.UseStateForUnknown(),
+				},
 			},
 			"definition_id": {
 				Description: "Destination Definition ID",

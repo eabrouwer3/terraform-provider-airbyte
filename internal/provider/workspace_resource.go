@@ -39,16 +39,25 @@ func (r *WorkspaceResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.D
 				Description: "Workspace ID",
 				Type:        types.StringType,
 				Computed:    true,
+				PlanModifiers: []tfsdk.AttributePlanModifier{
+					resource.UseStateForUnknown(),
+				},
 			},
 			"slug": {
 				Description: "Workspace Slug",
 				Type:        types.StringType,
 				Computed:    true,
+				PlanModifiers: []tfsdk.AttributePlanModifier{
+					resource.UseStateForUnknown(),
+				},
 			},
 			"customer_id": {
 				Description: "Customer ID",
 				Type:        types.StringType,
 				Computed:    true,
+				PlanModifiers: []tfsdk.AttributePlanModifier{
+					resource.UseStateForUnknown(),
+				},
 			},
 			"email": {
 				Description: "Customer Email",

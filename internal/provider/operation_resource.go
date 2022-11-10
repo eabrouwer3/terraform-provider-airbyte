@@ -41,6 +41,9 @@ func (r *OperationResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.D
 				Description: "Operation ID",
 				Type:        types.StringType,
 				Computed:    true,
+				PlanModifiers: []tfsdk.AttributePlanModifier{
+					resource.UseStateForUnknown(),
+				},
 			},
 			"workspace_id": {
 				Description: "Workspace ID",

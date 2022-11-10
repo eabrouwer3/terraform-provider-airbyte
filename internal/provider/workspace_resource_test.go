@@ -53,10 +53,10 @@ func TestAccResourceWorkspace_complex(t *testing.T) {
 					resource.TestCheckResourceAttr("airbyte_workspace.complex", "notification_config.1.slack_webhook", "https://example2.com/cooler-webhook"),
 				),
 			},
-			//{
-			//	Config: testAccResourceWorkspace_complexChange,
-			//	Check:  resource.TestCheckResourceAttr("airbyte_workspace.complex", "notification_config.#", "1"),
-			//},
+			{
+				Config: testAccResourceWorkspace_complexChange,
+				Check:  resource.TestCheckResourceAttr("airbyte_workspace.complex", "notification_config.#", "1"),
+			},
 		},
 	})
 }
@@ -107,18 +107,18 @@ resource "airbyte_workspace" "complex" {
 }
 `
 
-//const testAccResourceWorkspace_complexChange = `
-//resource "airbyte_workspace" "complex" {
-//  name = "complex_test"
-//  email = "test@example.com"
-//  display_setup_wizard = true
-//  anonymous_data_collection = false
-//  news = true
-//  security_updates = true
-//  notification_config = [{
-//    notification_type = "slack"
-//    send_on_success = true
-//    slack_webhook = "http://example.com/webhook"
-//  }]
-//}
-//`
+const testAccResourceWorkspace_complexChange = `
+resource "airbyte_workspace" "complex" {
+ name = "complex_test"
+ email = "test@example.com"
+ display_setup_wizard = true
+ anonymous_data_collection = false
+ news = true
+ security_updates = true
+ notification_config = [{
+   notification_type = "slack"
+   send_on_success = true
+   slack_webhook = "http://example.com/webhook"
+ }]
+}
+`

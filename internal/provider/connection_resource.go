@@ -43,6 +43,9 @@ func (r *ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 				Description: "Connection ID",
 				Type:        types.StringType,
 				Computed:    true,
+				PlanModifiers: []tfsdk.AttributePlanModifier{
+					resource.UseStateForUnknown(),
+				},
 			},
 			"source_id": {
 				Description: "Source ID",
@@ -75,6 +78,9 @@ func (r *ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 				Type:        types.StringType,
 				Optional:    true,
 				Computed:    true,
+				PlanModifiers: []tfsdk.AttributePlanModifier{
+					resource.UseStateForUnknown(),
+				},
 			},
 			"namespace_definition": {
 				Description: "Method used for computing final namespace in destination. " +

@@ -38,6 +38,9 @@ func (r *SourceResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diag
 				Description: "Source ID",
 				Type:        types.StringType,
 				Computed:    true,
+				PlanModifiers: []tfsdk.AttributePlanModifier{
+					resource.UseStateForUnknown(),
+				},
 			},
 			"definition_id": {
 				Description: "Source Definition ID",
