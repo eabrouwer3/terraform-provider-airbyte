@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/go-retryablehttp"
 	"io"
 	"net/http"
 	"strings"
@@ -15,7 +16,7 @@ type ApiClient struct {
 	HostURL           string // http://localhost:8000
 	Username          string
 	Password          string
-	HTTPClient        *http.Client
+	HTTPClient        *retryablehttp.Client
 	AdditionalHeaders map[string]string
 }
 
@@ -93,7 +94,11 @@ func (c *ApiClient) doRequest(req *http.Request) ([]byte, error) {
 		}
 	}
 
-	res, err := c.HTTPClient.Do(req)
+	retryableReq, err := retryablehttp.FromRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	res, err := c.HTTPClient.Do(retryableReq)
 	if err != nil {
 		return nil, err
 	}

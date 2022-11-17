@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-provider-scaffolding-framework/internal/apiclient"
 	"net/http"
@@ -157,12 +158,14 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 		timeout = time.Duration(data.Timeout.ValueInt64())
 	}
 
+	httpClient := retryablehttp.NewClient()
+	httpClient.HTTPClient = &http.Client{Timeout: timeout * time.Second}
 	client := apiclient.ApiClient{
 		HostURL:           hostUrl,
 		Username:          username,
 		Password:          password,
 		AdditionalHeaders: additionalHeadersVals,
-		HTTPClient:        &http.Client{Timeout: timeout * time.Second},
+		HTTPClient:        httpClient,
 	}
 
 	err := client.Check()
