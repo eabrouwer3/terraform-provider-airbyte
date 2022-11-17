@@ -18,8 +18,9 @@ provider "airbyte" {
   username = "airbyte"
   password = "password"
   additional_headers = {
-    Host = "airbyte.internal.io"
+    Host = "airbyte.internal"
   }
+  timeout = 120
 }
 ```
 
@@ -31,4 +32,5 @@ provider "airbyte" {
 - `additional_headers` (Map of String) Additional Headers to pass in requests to Airbyte's API
 - `host_url` (String) Airbyte API URL
 - `password` (String, Sensitive) Airbyte API Password
+- `timeout` (Number) HTTP Timeout in Seconds (Default: 600)
 - `username` (String) Airbyte API Username
