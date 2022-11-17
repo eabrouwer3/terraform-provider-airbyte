@@ -3,6 +3,7 @@ provider "airbyte" {
   username = "airbyte"
   password = "password"
   additional_headers = {
-    Host = "airbyte.internal.io"
+    Host = "airbyte.internal"
   }
+  timeout = 120
 }

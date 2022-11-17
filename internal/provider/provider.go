@@ -34,6 +34,7 @@ type AirbyteProviderModel struct {
 	Username          types.String `tfsdk:"username"`
 	Password          types.String `tfsdk:"password"`
 	AdditionalHeaders types.Map    `tfsdk:"additional_headers"`
+	Timeout           types.Int64  `tfsdk:"timeout"`
 }
 
 func (p *AirbyteProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -64,6 +65,11 @@ func (p *AirbyteProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 				Description: "Additional Headers to pass in requests to Airbyte's API",
 				Optional:    true,
 				Type:        types.MapType{ElemType: types.StringType},
+			},
+			"timeout": {
+				Description: "HTTP Timeout in Seconds (Default: 600)",
+				Optional:    true,
+				Type:        types.Int64Type,
 			},
 		},
 	}, nil
@@ -146,12 +152,17 @@ func (p *AirbyteProvider) Configure(ctx context.Context, req provider.ConfigureR
 		additionalHeadersVals[k] = v.(types.String).ValueString()
 	}
 
+	timeout := time.Duration(600)
+	if !data.Timeout.IsUnknown() {
+		timeout = time.Duration(data.Timeout.ValueInt64())
+	}
+
 	client := apiclient.ApiClient{
 		HostURL:           hostUrl,
 		Username:          username,
 		Password:          password,
 		AdditionalHeaders: additionalHeadersVals,
-		HTTPClient:        &http.Client{Timeout: 120 * time.Second},
+		HTTPClient:        &http.Client{Timeout: timeout * time.Second},
 	}
 
 	err := client.Check()
