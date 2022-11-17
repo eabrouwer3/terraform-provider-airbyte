@@ -181,6 +181,7 @@ func (p *AirbyteProvider) Resources(ctx context.Context) []func() resource.Resou
 func (p *AirbyteProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewWorkspaceDataSource,
+		NewWorkspaceIdsDataSource,
 		NewSourceSchemaCatalogDataSource,
 	}
 }

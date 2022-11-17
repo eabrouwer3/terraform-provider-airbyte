@@ -59,6 +59,10 @@ type SlackConfiguration struct {
 	Webhook string `json:"webhook"`
 }
 
+type WorkspaceList struct {
+	Workspaces []*Workspace `json:"workspaces"`
+}
+
 func (c *ApiClient) GetWorkspaceById(workspaceId string) (*Workspace, error) {
 	rb, err := json.Marshal(WorkspaceIdBody{
 		WorkspaceId: workspaceId,
@@ -113,6 +117,26 @@ func (c *ApiClient) GetWorkspaceBySlug(slug string) (*Workspace, error) {
 	}
 
 	return &workspace, nil
+}
+
+func (c *ApiClient) GetWorkspaces() ([]*Workspace, error) {
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/workspaces/list", c.HostURL, BaseUrl), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	wl := WorkspaceList{}
+	err = json.Unmarshal(body, &wl)
+	if err != nil {
+		return nil, err
+	}
+
+	return wl.Workspaces, nil
 }
 
 func (c *ApiClient) CreateWorkspace(newWorkspace NewWorkspace) (*Workspace, error) {
