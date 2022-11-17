@@ -15,7 +15,7 @@ type DestinationIdBody struct {
 }
 
 type CommonConnectorFields struct {
-	Name                    string          `json:"name"`
+	Name                    string          `json:"name,omitempty"`
 	ConnectionConfiguration json.RawMessage `json:"connectionConfiguration"`
 }
 
@@ -96,6 +96,14 @@ func (c *ApiClient) CreateConnector(newConnector NewConnector, t ConnectorType) 
 		return nil, err
 	}
 
+	checkResponse, err := c.CheckNewConnector(newConnector, t)
+	if err != nil {
+		return nil, err
+	}
+	if checkResponse.Status != "succeeded" {
+		return nil, fmt.Errorf("checking new configuration failed (jobId: %s, message: %s)", checkResponse.JobInfo.Id, checkResponse.Message)
+	}
+
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/%s/create", c.HostURL, BaseUrl, urlPath), strings.NewReader(string(rb)))
 	if err != nil {
 		return nil, err
@@ -127,6 +135,14 @@ func (c *ApiClient) UpdateConnector(updatedConnector UpdatedConnector, t Connect
 	}
 	if err != nil {
 		return nil, err
+	}
+
+	checkResponse, err := c.CheckUpdatedConnector(updatedConnector, t)
+	if err != nil {
+		return nil, err
+	}
+	if checkResponse.Status != "succeeded" {
+		return nil, fmt.Errorf("checking updated configuration failed (jobId: %s, message: %s)", checkResponse.JobInfo.Id, checkResponse.Message)
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/%s/update", c.HostURL, BaseUrl, urlPath), strings.NewReader(string(rb)))

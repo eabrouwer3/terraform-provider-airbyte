@@ -13,16 +13,6 @@ type SourceSchemaCatalog struct {
 	catalogId string
 }
 
-type JobInfo struct {
-	Succeeded  bool `json:"succeeded"`
-	id         string
-	configType string
-	configId   string
-	createdAt  int
-	endedAt    int
-	logs       map[string][]string
-}
-
 type SyncCatalog struct {
 	Streams []Stream `json:"streams"`
 }
