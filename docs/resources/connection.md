@@ -215,7 +215,7 @@ Required:
 Required:
 
 - `cron_expression` (String) [Cron Expression](http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html). Example: `0 0 12 * * ?`.
-- `cron_time_zone` (Number) Time Zone to honor cron expression according to. Examples: `UTC`, `US/Denver`, etc.See the 'TZ database name' column [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for all options.
+- `cron_time_zone` (String) Time Zone to honor cron expression according to. Examples: `UTC`, `US/Denver`, etc.See the 'TZ database name' column [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for all options.
 
 
 <a id="nestedatt--resource_requirements"></a>
