@@ -269,7 +269,7 @@ func (r *ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 					"cron_time_zone": {
 						MarkdownDescription: "Time Zone to honor cron expression according to. Examples: `UTC`, `US/Denver`, etc." +
 							"See the 'TZ database name' column [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for all options.",
-						Type:     types.Int64Type,
+						Type:     types.StringType,
 						Required: true,
 					},
 				}),
