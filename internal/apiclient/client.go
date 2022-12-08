@@ -4,10 +4,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/go-retryablehttp"
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/hashicorp/go-retryablehttp"
 )
 
 const BaseUrl = "api/v1"
@@ -113,6 +114,7 @@ func (c *ApiClient) doRequest(req *http.Request) ([]byte, error) {
 		if res.StatusCode == http.StatusUnprocessableEntity {
 			r := Response422{}
 			err := json.Unmarshal(body, &r)
+			fmt.Println(err)
 			if err == nil {
 				body, _ = json.Marshal(r)
 			}

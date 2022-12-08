@@ -34,8 +34,8 @@ type CommonConnectorDefinitionFields struct {
 
 type NewConnectorDefinition struct {
 	WorkspaceIdBody
-	SourceDefinition      CommonConnectorDefinitionFields `json:"sourceDefinition,omitempty"`
-	DestinationDefinition CommonConnectorDefinitionFields `json:"destinationDefinition,omitempty"`
+	SourceDefinition      *CommonConnectorDefinitionFields `json:"sourceDefinition,omitempty"`
+	DestinationDefinition *CommonConnectorDefinitionFields `json:"destinationDefinition,omitempty"`
 }
 
 type UpdatedConnectorDefinition struct {

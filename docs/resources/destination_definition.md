@@ -15,6 +15,7 @@ DestinationDefinition resource
 ```terraform
 # Basic version of a custom destination definition
 resource "airbyte_destination_definition" "basic" {
+  workspace_id      = airbyte_workspace.test.id
   name              = "basic_test"
   docker_repository = "eabrouwer3/airbyte-test-data-destination"
   docker_image_tag  = "0.0.1"
@@ -23,6 +24,7 @@ resource "airbyte_destination_definition" "basic" {
 
 # Much more complex version of a custom destination definition
 resource "airbyte_destination_definition" "complex" {
+  workspace_id      = airbyte_workspace.test.id
   name              = "complex_test"
   docker_repository = "eabrouwer3/airbyte-test-data-destination"
   docker_image_tag  = "0.0.1"
@@ -58,6 +60,7 @@ resource "airbyte_destination_definition" "complex" {
 - `docker_repository` (String) Docker Repository URL (e.g. 112233445566.dkr.ecr.us-east-1.amazonaws.com/destination-custom) or DockerHub identifier (e.g. airbyte/destination-postgres)
 - `documentation_url` (String) Documentation URL
 - `name` (String) Destination Definition Name
+- `workspace_id` (String) Workspace ID
 
 ### Optional
 

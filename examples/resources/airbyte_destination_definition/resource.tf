@@ -1,5 +1,6 @@
 # Basic version of a custom destination definition
 resource "airbyte_destination_definition" "basic" {
+  workspace_id      = airbyte_workspace.test.id
   name              = "basic_test"
   docker_repository = "eabrouwer3/airbyte-test-data-destination"
   docker_image_tag  = "0.0.1"
@@ -8,6 +9,7 @@ resource "airbyte_destination_definition" "basic" {
 
 # Much more complex version of a custom destination definition
 resource "airbyte_destination_definition" "complex" {
+  workspace_id      = airbyte_workspace.test.id
   name              = "complex_test"
   docker_repository = "eabrouwer3/airbyte-test-data-destination"
   docker_image_tag  = "0.0.1"

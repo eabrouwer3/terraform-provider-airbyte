@@ -189,11 +189,12 @@ func (r *DestinationDefinitionResource) Create(ctx context.Context, req resource
 		return
 	}
 
+	commonFields := GetCommonConnectorDefinitionFields(plan)
 	newDestinationDefinition := apiclient.NewConnectorDefinition{
 		WorkspaceIdBody: apiclient.WorkspaceIdBody{
 			WorkspaceId: plan.WorkspaceId.ValueString(),
 		},
-		DestinationDefinition: GetCommonConnectorDefinitionFields(plan),
+		DestinationDefinition: &commonFields,
 	}
 
 	destinationDefinition, err := r.client.CreateConnectorDefinition(newDestinationDefinition, apiclient.DestinationType)
@@ -213,6 +214,7 @@ func (r *DestinationDefinitionResource) Create(ctx context.Context, req resource
 		)
 		return
 	}
+	state.WorkspaceId = plan.WorkspaceId
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
@@ -239,6 +241,7 @@ func (r *DestinationDefinitionResource) Read(ctx context.Context, req resource.R
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Destination Definition, got error: %s", err))
 		return
 	}
+	state.WorkspaceId = plan.WorkspaceId
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
@@ -270,6 +273,7 @@ func (r *DestinationDefinitionResource) Update(ctx context.Context, req resource
 	}
 
 	state, err := FlattenConnectorDefinition(destinationDefinition)
+	state.WorkspaceId = plan.WorkspaceId
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }

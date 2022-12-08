@@ -189,11 +189,12 @@ func (r *SourceDefinitionResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
+	commonFields := GetCommonConnectorDefinitionFields(plan)
 	newSourceDefinition := apiclient.NewConnectorDefinition{
 		WorkspaceIdBody: apiclient.WorkspaceIdBody{
 			WorkspaceId: plan.WorkspaceId.ValueString(),
 		},
-		SourceDefinition: GetCommonConnectorDefinitionFields(plan),
+		SourceDefinition: &commonFields,
 	}
 
 	sourceDefinition, err := r.client.CreateConnectorDefinition(newSourceDefinition, apiclient.SourceType)
@@ -213,6 +214,7 @@ func (r *SourceDefinitionResource) Create(ctx context.Context, req resource.Crea
 		)
 		return
 	}
+	state.WorkspaceId = plan.WorkspaceId
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
@@ -239,6 +241,7 @@ func (r *SourceDefinitionResource) Read(ctx context.Context, req resource.ReadRe
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read Source Definition, got error: %s", err))
 		return
 	}
+	state.WorkspaceId = plan.WorkspaceId
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }
@@ -270,6 +273,7 @@ func (r *SourceDefinitionResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	state, err := FlattenConnectorDefinition(sourceDefinition)
+	state.WorkspaceId = plan.WorkspaceId
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
 }

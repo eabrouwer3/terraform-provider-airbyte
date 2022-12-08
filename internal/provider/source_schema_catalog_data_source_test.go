@@ -31,6 +31,7 @@ resource "airbyte_workspace" "test" {
 }
 
 resource "airbyte_source_definition" "test" {
+	workspace_id = airbyte_workspace.test.id
   name = "test_source_definition"
   docker_repository = "eabrouwer3/airbyte-test-data-source"
   docker_image_tag = "0.0.1"

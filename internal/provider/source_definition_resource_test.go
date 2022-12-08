@@ -61,7 +61,12 @@ func TestAccResourceSourceDefinition_complex(t *testing.T) {
 }
 
 const testAccResourceSourceDefinition_basic = `
+resource "airbyte_workspace" "test" {
+  name = "test_workspace"
+}
+
 resource "airbyte_source_definition" "basic" {
+	workspace_id = airbyte_workspace.test.id
   name = "basic_test"
   docker_repository = "eabrouwer3/airbyte-test-data-source"
   docker_image_tag = "0.0.1"
@@ -70,7 +75,12 @@ resource "airbyte_source_definition" "basic" {
 `
 
 const testAccResourceSourceDefinition_complex = `
+resource "airbyte_workspace" "test" {
+  name = "test_workspace"
+}
+
 resource "airbyte_source_definition" "complex" {
+	workspace_id = airbyte_workspace.test.id
   name = "complex_test"
   docker_repository = "eabrouwer3/airbyte-test-data-source"
   docker_image_tag = "0.0.1"

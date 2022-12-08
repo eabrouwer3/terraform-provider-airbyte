@@ -15,6 +15,7 @@ SourceDefinition resource
 ```terraform
 # Basic version of a custom source definition
 resource "airbyte_source_definition" "basic" {
+  workspace_id      = airbyte_workspace.test.id
   name              = "basic_test"
   docker_repository = "eabrouwer3/airbyte-test-data-source"
   docker_image_tag  = "0.0.1"
@@ -23,6 +24,7 @@ resource "airbyte_source_definition" "basic" {
 
 # Much more complex version of a custom source definition
 resource "airbyte_source_definition" "complex" {
+  workspace_id      = airbyte_workspace.test.id
   name              = "complex_test"
   docker_repository = "eabrouwer3/airbyte-test-data-source"
   docker_image_tag  = "0.0.1"
@@ -58,6 +60,7 @@ resource "airbyte_source_definition" "complex" {
 - `docker_repository` (String) Docker Repository URL (e.g. 112233445566.dkr.ecr.us-east-1.amazonaws.com/source-custom) or DockerHub identifier (e.g. airbyte/source-postgres)
 - `documentation_url` (String) Documentation URL
 - `name` (String) Source Definition Name
+- `workspace_id` (String) Workspace ID
 
 ### Optional
 
