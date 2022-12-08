@@ -32,7 +32,11 @@ type CommonConnectorDefinitionFields struct {
 	ResourceRequirements *ResourceRequirements `json:"resourceRequirements,omitempty"`
 }
 
-type NewConnectorDefinition = CommonConnectorDefinitionFields
+type NewConnectorDefinition struct {
+	WorkspaceIdBody
+	SourceDefinition      CommonConnectorDefinitionFields `json:"sourceDefinition,omitempty"`
+	DestinationDefinition CommonConnectorDefinitionFields `json:"destinationDefinition,omitempty"`
+}
 
 type UpdatedConnectorDefinition struct {
 	SourceDefinitionIdBody
@@ -117,7 +121,7 @@ func (c *ApiClient) CreateConnectorDefinition(newDefinition NewConnectorDefiniti
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/%s/create", c.HostURL, BaseUrl, urlPath), strings.NewReader(string(rb)))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/%s/create_custom", c.HostURL, BaseUrl, urlPath), strings.NewReader(string(rb)))
 	if err != nil {
 		return nil, err
 	}

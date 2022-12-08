@@ -43,6 +43,11 @@ func (r *SourceDefinitionResource) GetSchema(ctx context.Context) (tfsdk.Schema,
 					resource.UseStateForUnknown(),
 				},
 			},
+			"workspace_id": {
+				Description: "Workspace ID",
+				Type:        types.StringType,
+				Required:    true,
+			},
 			"name": {
 				Description: "Source Definition Name",
 				Type:        types.StringType,
@@ -184,7 +189,12 @@ func (r *SourceDefinitionResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	newSourceDefinition := GetCommonConnectorDefinitionFields(plan)
+	newSourceDefinition := apiclient.NewConnectorDefinition{
+		WorkspaceIdBody: apiclient.WorkspaceIdBody{
+			WorkspaceId: plan.WorkspaceId.ValueString(),
+		},
+		SourceDefinition: GetCommonConnectorDefinitionFields(plan),
+	}
 
 	sourceDefinition, err := r.client.CreateConnectorDefinition(newSourceDefinition, apiclient.SourceType)
 	if err != nil {

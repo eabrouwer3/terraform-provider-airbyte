@@ -43,6 +43,11 @@ func (r *DestinationDefinitionResource) GetSchema(ctx context.Context) (tfsdk.Sc
 					resource.UseStateForUnknown(),
 				},
 			},
+			"workspace_id": {
+				Description: "Workspace ID",
+				Type:        types.StringType,
+				Required:    true,
+			},
 			"name": {
 				Description: "Destination Definition Name",
 				Type:        types.StringType,
@@ -184,7 +189,12 @@ func (r *DestinationDefinitionResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	newDestinationDefinition := GetCommonConnectorDefinitionFields(plan)
+	newDestinationDefinition := apiclient.NewConnectorDefinition{
+		WorkspaceIdBody: apiclient.WorkspaceIdBody{
+			WorkspaceId: plan.WorkspaceId.ValueString(),
+		},
+		DestinationDefinition: GetCommonConnectorDefinitionFields(plan),
+	}
 
 	destinationDefinition, err := r.client.CreateConnectorDefinition(newDestinationDefinition, apiclient.DestinationType)
 	if err != nil {

@@ -9,6 +9,7 @@ import (
 // ConnectorDefinitionModel describes the data source data model.
 type ConnectorDefinitionModel struct {
 	Id                              types.String                        `tfsdk:"id"`
+	WorkspaceId                     types.String                        `tfsdk:"workspace_id"`
 	Name                            types.String                        `tfsdk:"name"`
 	DockerRepository                types.String                        `tfsdk:"docker_repository"`
 	DockerImageTag                  types.String                        `tfsdk:"docker_image_tag"`
