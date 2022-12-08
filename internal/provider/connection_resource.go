@@ -98,6 +98,7 @@ func (r *ConnectionResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 					"namespaceDefinition = 'source'.",
 				Type:     types.StringType,
 				Optional: true,
+				Computed: true,
 			},
 			"prefix": {
 				Description: "Prefix that will be prepended to the name of each stream when it is written to the destination. Example: \"airbyte_\"",
