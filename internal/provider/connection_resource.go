@@ -345,73 +345,75 @@ func getCommonConnectionFields(data ConnectionModel) apiclient.CommonConnectionF
 	if data.SyncCatalog != nil {
 		var streams []apiclient.Stream
 		for _, cfg := range *data.SyncCatalog {
-			stream := apiclient.Stream{
-				Stream: apiclient.SourceStreamSchema{
-					Name: cfg.SourceSchema.Name.ValueString(),
-				},
-				Config: apiclient.DestinationStreamConfig{
-					SyncMode: cfg.DestinationConfig.SyncMode.ValueString(),
-				},
-			}
+			if selected := cfg.DestinationConfig.Selected; selected.IsUnknown() || selected.ValueBool() {
+				stream := apiclient.Stream{
+					Stream: apiclient.SourceStreamSchema{
+						Name: cfg.SourceSchema.Name.ValueString(),
+					},
+					Config: apiclient.DestinationStreamConfig{
+						SyncMode: cfg.DestinationConfig.SyncMode.ValueString(),
+					},
+				}
 
-			// Source Schema Fields
-			if v := cfg.SourceSchema.JsonSchema; !v.IsUnknown() {
-				stream.Stream.JsonSchema = json.RawMessage(v.ValueString())
-			}
-			if v := cfg.SourceSchema.SupportedSyncModes; !v.IsUnknown() {
-				for _, elem := range v.Elements() {
-					stream.Stream.SupportedSyncModes = append(stream.Stream.SupportedSyncModes, elem.(types.String).ValueString())
+				// Source Schema Fields
+				if v := cfg.SourceSchema.JsonSchema; !v.IsUnknown() {
+					stream.Stream.JsonSchema = json.RawMessage(v.ValueString())
 				}
-			}
-			if v := cfg.SourceSchema.SourceDefinedCursor; !v.IsUnknown() {
-				b := v.ValueBool()
-				stream.Stream.SourceDefinedCursor = &b
-			}
-			if v := cfg.SourceSchema.DefaultCursorField; !v.IsUnknown() {
-				for _, elem := range v.Elements() {
-					stream.Stream.DefaultCursorField = append(stream.Stream.DefaultCursorField, elem.(types.String).ValueString())
-				}
-			}
-			if v := cfg.SourceSchema.SourceDefinedPrimaryKey; !v.IsUnknown() {
-				for _, elem := range v.Elements() {
-					var arr []string
-					for _, inner := range elem.(types.List).Elements() {
-						arr = append(arr, inner.(types.String).ValueString())
+				if v := cfg.SourceSchema.SupportedSyncModes; !v.IsUnknown() {
+					for _, elem := range v.Elements() {
+						stream.Stream.SupportedSyncModes = append(stream.Stream.SupportedSyncModes, elem.(types.String).ValueString())
 					}
-					stream.Stream.SourceDefinedPrimaryKey = append(stream.Stream.SourceDefinedPrimaryKey, arr)
 				}
-			}
-			if v := cfg.SourceSchema.Namespace; !v.IsUnknown() {
-				stream.Stream.Namespace = v.ValueString()
-			}
-
-			// Destination Config Fields
-			if v := cfg.DestinationConfig.DestinationSyncMode; !v.IsUnknown() {
-				stream.Config.DestinationSyncMode = v.ValueString()
-			}
-			if v := cfg.DestinationConfig.CursorField; !v.IsUnknown() {
-				for _, elem := range v.Elements() {
-					stream.Config.CursorField = append(stream.Config.CursorField, elem.(types.String).ValueString())
+				if v := cfg.SourceSchema.SourceDefinedCursor; !v.IsUnknown() {
+					b := v.ValueBool()
+					stream.Stream.SourceDefinedCursor = &b
 				}
-			}
-			if v := cfg.DestinationConfig.PrimaryKey; !v.IsUnknown() {
-				for _, elem := range v.Elements() {
-					var arr []string
-					for _, inner := range elem.(types.List).Elements() {
-						arr = append(arr, inner.(types.String).ValueString())
+				if v := cfg.SourceSchema.DefaultCursorField; !v.IsUnknown() {
+					for _, elem := range v.Elements() {
+						stream.Stream.DefaultCursorField = append(stream.Stream.DefaultCursorField, elem.(types.String).ValueString())
 					}
-					stream.Config.PrimaryKey = append(stream.Config.PrimaryKey, arr)
 				}
-			}
-			if v := cfg.DestinationConfig.AliasName; !v.IsUnknown() {
-				stream.Config.AliasName = v.ValueString()
-			}
-			if v := cfg.DestinationConfig.Selected; !v.IsUnknown() {
-				b := v.ValueBool()
-				stream.Config.Selected = &b
-			}
+				if v := cfg.SourceSchema.SourceDefinedPrimaryKey; !v.IsUnknown() {
+					for _, elem := range v.Elements() {
+						var arr []string
+						for _, inner := range elem.(types.List).Elements() {
+							arr = append(arr, inner.(types.String).ValueString())
+						}
+						stream.Stream.SourceDefinedPrimaryKey = append(stream.Stream.SourceDefinedPrimaryKey, arr)
+					}
+				}
+				if v := cfg.SourceSchema.Namespace; !v.IsUnknown() {
+					stream.Stream.Namespace = v.ValueString()
+				}
 
-			streams = append(streams, stream)
+				// Destination Config Fields
+				if v := cfg.DestinationConfig.DestinationSyncMode; !v.IsUnknown() {
+					stream.Config.DestinationSyncMode = v.ValueString()
+				}
+				if v := cfg.DestinationConfig.CursorField; !v.IsUnknown() {
+					for _, elem := range v.Elements() {
+						stream.Config.CursorField = append(stream.Config.CursorField, elem.(types.String).ValueString())
+					}
+				}
+				if v := cfg.DestinationConfig.PrimaryKey; !v.IsUnknown() {
+					for _, elem := range v.Elements() {
+						var arr []string
+						for _, inner := range elem.(types.List).Elements() {
+							arr = append(arr, inner.(types.String).ValueString())
+						}
+						stream.Config.PrimaryKey = append(stream.Config.PrimaryKey, arr)
+					}
+				}
+				if v := cfg.DestinationConfig.AliasName; !v.IsUnknown() {
+					stream.Config.AliasName = v.ValueString()
+				}
+				if v := cfg.DestinationConfig.Selected; !v.IsUnknown() {
+					b := v.ValueBool()
+					stream.Config.Selected = &b
+				}
+
+				streams = append(streams, stream)
+			}
 		}
 		fields.SyncCatalog = &apiclient.SyncCatalog{
 			Streams: streams,
