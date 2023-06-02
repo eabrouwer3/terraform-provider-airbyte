@@ -59,12 +59,14 @@ resource "airbyte_connection" "custom" {
 
 # More complex E2E Testing setup with some custom configuration
 resource "airbyte_source" "e2e" {
-  # Find the definition_id for an existing source here: https://github.com/airbytehq/airbyte/blob/master/airbyte-config/init/src/main/resources/seed/source_definitions.yaml
+  # Find the definition_id for an existing source here https://github.com/airbytehq/airbyte/tree/master/airbyte-integrations/connectors
+  # Look for metadata.yaml file, e.g. https://github.com/airbytehq/airbyte/blob/master/airbyte-integrations/connectors/source-e2e-test/metadata.yaml
   definition_id = "d53f9084-fa6b-4a5a-976c-5b8392f4ad8a"
   workspace_id  = airbyte_workspace.test.id
   name          = "e2e_source"
   # Find the spec either in the docs for the connector
-  # Or, find it here: https://github.com/airbytehq/airbyte/blob/master/airbyte-config/init/src/main/resources/seed/source_specs.yaml
+  # Or, find it here: https://github.com/airbytehq/airbyte/tree/master/airbyte-integrations/connectors
+  # Look for src/main/resources/spec.json file, e.g. https://github.com/airbytehq/airbyte/blob/master/airbyte-integrations/connectors/source-e2e-test/src/main/resources/spec.json
   connection_configuration = jsonencode({
     type = "CONTINUOUS_FEED"
     mock_catalog = {
@@ -77,12 +79,14 @@ resource "airbyte_source" "e2e" {
 }
 
 resource "airbyte_destination" "e2e" {
-  # Find the definition_id for an existing source here: https://github.com/airbytehq/airbyte/blob/master/airbyte-config/init/src/main/resources/seed/destination_definitions.yaml
+  # Find the definition_id for an existing source here: https://github.com/airbytehq/airbyte/tree/master/airbyte-integrations/connectors
+  # Look for metadata.yaml file, e.g. https://github.com/airbytehq/airbyte/blob/master/airbyte-integrations/connectors/destination-e2e-test/metadata.yaml
   definition_id = "2eb65e87-983a-4fd7-b3e3-9d9dc6eb8537"
   workspace_id  = airbyte_workspace.test.id
   name          = "e2e_destination"
   # Find the spec either in the docs for the connector
-  # Or, find it here: https://github.com/airbytehq/airbyte/blob/master/airbyte-config/init/src/main/resources/seed/destination_specs.yaml
+  # Or, find it here: https://github.com/airbytehq/airbyte/tree/master/airbyte-integrations/connectors
+  # Look for src/main/resources/spec.json file, e.g. https://github.com/airbytehq/airbyte/blob/master/airbyte-integrations/connectors/destination-e2e-test/src/main/resources/spec.json
   connection_configuration = jsonencode({
     type = "LOGGING"
     logging_config = {
