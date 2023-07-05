@@ -1,3 +1,12 @@
+# ARCHIVED
+
+Because we decided against using Airbyte at my workplace, I haven't had any need to maintain this,
+so I'm glad others have taken the mantel. I hope this has served as a good starting point for
+him and others to continue working on this. For now, please use this version instead of mine as
+it's more actively managed.
+
+### [josephjohncox/terraform-provider-aribyte](https://github.com/josephjohncox/terraform-provider-airbyte)
+
 # Terraform Provider Airbyte (Terraform Plugin Framework)
 
 Terraform Provider for [Airbyte](https://airbyte.io/).
